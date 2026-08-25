@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text, useWindowSize } from 'ink';
 import Greeting from './Greeting';
 import PromptInput from './PromptInput';
+import HarnessStatus from './HarnessStatus';
 
 const SCREEN_PADDING = 1;
 
@@ -24,13 +25,17 @@ export default function Screen() {
 
       <Text>{"─".repeat(separatorWidth)}</Text>
 
+      <Box width="100%" justifyContent="flex-start" paddingLeft={3} paddingRight={3}>
+        <HarnessStatus />
+      </Box>
+
       <Box
         justifyContent="flex-start"
         height={inputHeight}
-        paddingTop={1}
         paddingLeft={3}
         paddingRight={3}
       >
+
         <PromptInput />
       </Box>
     </Box>

@@ -21,7 +21,7 @@ Journeys:
 - [ ] **1. Open/Close CLI** — opens and closes the TUI.
   - [x] 1.1 Show greeting.
   - [x] 1.2 Show text input prompt.
-  - [ ] 1.3 Connect to the running server.
+  - [x] 1.3 Connect to the running server.
   - [ ] 1.4 Ctrl+C exits the TUI — with no turn in progress.
   - [ ] 1.5 Error: server unreachable → clear message; TUI does not open.
 - [ ] **2. Send message to the AI** — prompt sent by the TUI.
