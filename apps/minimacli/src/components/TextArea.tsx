@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, Text, useInput, useCursor, useWindowSize, measureElement, type Key } from 'ink';
+import { buildLines, sliceLines, clamp } from '../lib/text';
 import { caretPosition } from '../lib/editor';
 import { applyKeyAction, defaultKeyAction, type TextAreaKeyAction } from '../lib/input';
 
@@ -13,6 +14,8 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
   const [cursor, setCursor] = useState(0);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
   const ref = useRef(null);
   const { setCursorPosition } = useCursor();
   const { columns, rows } = useWindowSize();
@@ -22,18 +25,33 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
     if (!node) {
       return;
     }
-    const { x, y, width } = measureElement(node);
+    const { x, y, width, height } = measureElement(node);
     setPos({ x, y });
     setWidth(width);
+    setHeight(height);
   }, [columns, rows, value]);
 
   const wrapWidth = Math.max(1, width);
+  const visibleHeight = Math.max(1, height);
   const clampCursor = Math.max(0, Math.min(cursor, value.length));
+  const lines = buildLines(value, wrapWidth);
   const caret = caretPosition(value, clampCursor, wrapWidth);
+
+  useEffect(() => {
+    setScrollTop((current) => {
+      if (caret.row < current) {
+        return caret.row;
+      }
+      if (caret.row >= current + visibleHeight) {
+        return caret.row - visibleHeight + 1;
+      }
+      return current;
+    });
+  }, [caret.row, visibleHeight]);
 
   setCursorPosition({
     x: pos.x + caret.col,
-    y: pos.y + caret.row,
+    y: pos.y + Math.max(0, caret.row - scrollTop),
   });
 
   function handle(state: { value: string; cursor: number }, action: TextAreaKeyAction) {
@@ -42,7 +60,22 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
     onChange(next.value);
   }
 
+  function scrollBy(delta: number) {
+    setScrollTop((current) => {
+      const maxScroll = Math.max(0, lines.length - visibleHeight);
+      return clamp(current + delta, maxScroll);
+    });
+  }
+
   useInput((input, key) => {
+    if (key.pageUp) {
+      scrollBy(-visibleHeight);
+      return;
+    }
+    if (key.pageDown) {
+      scrollBy(visibleHeight);
+      return;
+    }
     const result = onKey ? onKey(input, key) : true;
     if (result === false) {
       return;
@@ -54,9 +87,13 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
     handle({ value, cursor }, action);
   });
 
+  const visible = sliceLines(value, lines, scrollTop, scrollTop + visibleHeight);
+
   return (
-    <Box ref={ref} width="100%">
-      <Text>{value}</Text>
+    <Box ref={ref} width="100%" flexGrow={1}>
+      <Box height={visibleHeight} overflow="hidden">
+        <Text>{visible}</Text>
+      </Box>
     </Box>
   );
 }
