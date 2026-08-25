@@ -2,6 +2,8 @@ import type { Key } from 'ink';
 import {
   moveLeft,
   moveRight,
+  moveWordLeft,
+  moveWordRight,
   moveUp,
   moveDown,
   homeAll,
@@ -12,6 +14,8 @@ import {
   insertNewline,
   backspaceAt,
   deleteAt,
+  deleteWordLeft,
+  deleteWordRight,
   type EditorState,
 } from './editor';
 
@@ -20,8 +24,12 @@ export type TextAreaKeyAction =
   | { type: 'insert'; text: string }
   | { type: 'backspace' }
   | { type: 'delete' }
+  | { type: 'deleteWordLeft' }
+  | { type: 'deleteWordRight' }
   | { type: 'moveLeft' }
   | { type: 'moveRight' }
+  | { type: 'moveWordLeft' }
+  | { type: 'moveWordRight' }
   | { type: 'moveUp' }
   | { type: 'moveDown' }
   | { type: 'homeLine' }
@@ -32,6 +40,12 @@ export type TextAreaKeyAction =
 export function defaultKeyAction(input: string, key: Key): TextAreaKeyAction | null {
   if (key.return) {
     return key.ctrl ? { type: 'insertNewline' } : null;
+  }
+  if (key.ctrl && key.leftArrow) {
+    return { type: 'moveWordLeft' };
+  }
+  if (key.ctrl && key.rightArrow) {
+    return { type: 'moveWordRight' };
   }
   if (key.leftArrow) {
     return { type: 'moveLeft' };
@@ -53,6 +67,12 @@ export function defaultKeyAction(input: string, key: Key): TextAreaKeyAction | n
       : key.home
         ? { type: 'homeLine' }
         : { type: 'endLine' };
+  }
+  if (key.ctrl && key.backspace) {
+    return { type: 'deleteWordLeft' };
+  }
+  if (key.ctrl && key.delete) {
+    return { type: 'deleteWordRight' };
   }
   if (key.backspace) {
     return { type: 'backspace' };
@@ -76,6 +96,10 @@ export function applyKeyAction(
       return moveLeft(state);
     case 'moveRight':
       return moveRight(state);
+    case 'moveWordLeft':
+      return moveWordLeft(state);
+    case 'moveWordRight':
+      return moveWordRight(state);
     case 'moveUp':
       return moveUp(state, wrapWidth);
     case 'moveDown':
@@ -96,5 +120,9 @@ export function applyKeyAction(
       return backspaceAt(state);
     case 'delete':
       return deleteAt(state);
+    case 'deleteWordLeft':
+      return deleteWordLeft(state);
+    case 'deleteWordRight':
+      return deleteWordRight(state);
   }
 }

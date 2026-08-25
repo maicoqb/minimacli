@@ -19,6 +19,60 @@ export function moveRight(state: EditorState): EditorState {
   return { ...state, cursor: moveCodeUnit(state.value, state.cursor, 1), preferredCol: undefined };
 }
 
+const WORD_RE = /^\w/u;
+
+function isWordAt(text: string, start: number): boolean {
+  return start < text.length && WORD_RE.test(text.slice(start, start + 2));
+}
+
+export function moveWordRight(state: EditorState): EditorState {
+  const text = state.value;
+  const len = text.length;
+  let i = state.cursor;
+  while (i < len && !isWordAt(text, i)) {
+    i = moveCodeUnit(text, i, 1);
+  }
+  while (i < len && isWordAt(text, i)) {
+    i = moveCodeUnit(text, i, 1);
+  }
+  return { ...state, cursor: i, preferredCol: undefined };
+}
+
+export function moveWordLeft(state: EditorState): EditorState {
+  const text = state.value;
+  let i = state.cursor;
+  while (i > 0 && !isWordAt(text, i - 1)) {
+    i = moveCodeUnit(text, i, -1);
+  }
+  while (i > 0 && isWordAt(text, i - 1)) {
+    i = moveCodeUnit(text, i, -1);
+  }
+  return { ...state, cursor: i, preferredCol: undefined };
+}
+
+export function deleteWordLeft(state: EditorState): EditorState {
+  const start = moveWordLeft(state).cursor;
+  if (start === state.cursor) {
+    return state;
+  }
+  return {
+    ...state,
+    cursor: start,
+    value: state.value.slice(0, start) + state.value.slice(state.cursor),
+  };
+}
+
+export function deleteWordRight(state: EditorState): EditorState {
+  const end = moveWordRight(state).cursor;
+  if (end === state.cursor) {
+    return state;
+  }
+  return {
+    ...state,
+    value: state.value.slice(0, state.cursor) + state.value.slice(end),
+  };
+}
+
 export function moveUp(state: EditorState, wrapWidth: number): EditorState {
   const { lines, pos } = position(state, wrapWidth);
   if (pos.row <= 0) {
