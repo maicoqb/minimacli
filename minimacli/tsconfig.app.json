@@ -2,7 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../dist/out-tsc",
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
     "types": ["node"],
     "jsx": "react-jsx"
   },
