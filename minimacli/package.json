@@ -1,0 +1,7 @@
+{
+    "name": "minimacli",
+    "version": "0.0.0",
+    "bin": {
+        "minimacli": "main.js"
+    }
+}

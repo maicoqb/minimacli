@@ -82,3 +82,6 @@ closes → web dies (prune + kill); watcher exits if the web dies.
 
 Done criteria: tests covering what was built; docs updated;
 packaging (e.g., installable global binary); i18n.
+
+- force send message
+- message queue
