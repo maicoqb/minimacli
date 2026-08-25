@@ -1,4 +1,5 @@
 install-cli.sh
+.docs
 
 # dependencies
 node_modules/

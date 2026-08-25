@@ -6,95 +6,15 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "defaultConfiguration": "production",
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "platform": "node",
+        "target": "node",
         "outputPath": "dist/minimacli",
-        "format": [
-          "cjs"
-        ],
-        "bundle": true,
-        "main": "minimacli/src/main.ts",
+        "main": "minimacli/src/main.tsx",
         "tsConfig": "minimacli/tsconfig.app.json",
-        "assets": [
-          "minimacli/src/assets"
-        ],
-        "generatePackageJson": true,
-        "esbuildOptions": {
-          "sourcemap": true,
-          "outExtension": {
-            ".js": ".js"
-          }
-        }
-      },
-      "configurations": {
-        "development": {},
-        "production": {
-          "esbuildOptions": {
-            "sourcemap": false,
-            "outExtension": {
-              ".js": ".js"
-            }
-          }
-        }
-      }
-    },
-    "prune-lockfile": {
-      "dependsOn": [
-        "build"
-      ],
-      "cache": true,
-      "executor": "@nx/js:prune-lockfile",
-      "outputs": [
-        "{workspaceRoot}/dist/minimacli/package.json",
-        "{workspaceRoot}/dist/minimacli/package-lock.json"
-      ],
-      "options": {
-        "buildTarget": "build"
-      }
-    },
-    "copy-workspace-modules": {
-      "dependsOn": [
-        "build"
-      ],
-      "cache": true,
-      "outputs": [
-        "{workspaceRoot}/dist/minimacli/workspace_modules"
-      ],
-      "executor": "@nx/js:copy-workspace-modules",
-      "options": {
-        "buildTarget": "build"
-      }
-    },
-    "prune": {
-      "dependsOn": [
-        "prune-lockfile",
-        "copy-workspace-modules"
-      ],
-      "executor": "nx:noop"
-    },
-    "serve": {
-      "continuous": true,
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
-      "dependsOn": [
-        "build"
-      ],
-      "options": {
-        "buildTarget": "minimacli:build",
-        "runBuildTargetDependencies": false
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "minimacli:build:development"
-        },
-        "production": {
-          "buildTarget": "minimacli:build:production"
-        }
+        "webpackConfig": "webpack.config.cjs",
+        "outputFileName": "main.js"
       }
     }
   }
