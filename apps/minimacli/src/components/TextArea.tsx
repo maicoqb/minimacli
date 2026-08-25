@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, Text, useInput, useCursor, useWindowSize, measureElement, type Key } from 'ink';
-import { buildLines, sliceLines, clamp } from '../lib/text';
-import { caretPosition } from '../lib/editor';
+import { buildLines, sliceLines, idxToPos, clamp } from '../lib/text';
 import { applyKeyAction, defaultKeyAction, type TextAreaKeyAction } from '../lib/input';
 
 type TextAreaProps = {
@@ -33,12 +32,15 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
 
   const wrapWidth = Math.max(1, width);
   const visibleHeight = Math.max(1, height);
-  const clampCursor = Math.max(0, Math.min(cursor, value.length));
   const lines = buildLines(value, wrapWidth);
-  const caret = caretPosition(value, clampCursor, wrapWidth);
+  const caret = idxToPos(lines, clamp(cursor, value.length));
 
   useEffect(() => {
     setScrollTop((current) => {
+      const maxScroll = Math.max(0, lines.length - visibleHeight);
+      if (current > maxScroll) {
+        return maxScroll;
+      }
       if (caret.row < current) {
         return caret.row;
       }
@@ -47,7 +49,7 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
       }
       return current;
     });
-  }, [caret.row, visibleHeight]);
+  }, [caret.row, visibleHeight, lines.length]);
 
   setCursorPosition({
     x: pos.x + caret.col,

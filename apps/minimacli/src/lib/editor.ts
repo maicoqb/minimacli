@@ -6,23 +6,17 @@ export type EditorState = {
   preferredCol?: number;
 };
 
-export type CaretPos = { row: number; col: number };
-
-export function caretPosition(value: string, cursor: number, wrapWidth: number): CaretPos {
-  return idxToPos(buildLines(value, wrapWidth), clamp(cursor, value.length));
-}
-
 export function position(state: EditorState, wrapWidth: number) {
   const lines = buildLines(state.value, wrapWidth);
   return { lines, pos: idxToPos(lines, clamp(state.cursor, state.value.length)) };
 }
 
-export function moveLeft(state: EditorState, wrapWidth: number): EditorState {
-  return { ...state, cursor: moveCodeUnit(state.value, state.cursor, -1) };
+export function moveLeft(state: EditorState): EditorState {
+  return { ...state, cursor: moveCodeUnit(state.value, state.cursor, -1), preferredCol: undefined };
 }
 
-export function moveRight(state: EditorState, wrapWidth: number): EditorState {
-  return { ...state, cursor: moveCodeUnit(state.value, state.cursor, 1) };
+export function moveRight(state: EditorState): EditorState {
+  return { ...state, cursor: moveCodeUnit(state.value, state.cursor, 1), preferredCol: undefined };
 }
 
 export function moveUp(state: EditorState, wrapWidth: number): EditorState {

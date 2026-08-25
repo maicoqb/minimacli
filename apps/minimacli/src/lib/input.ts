@@ -73,9 +73,9 @@ export function applyKeyAction(
 ): EditorState {
   switch (action.type) {
     case 'moveLeft':
-      return moveLeft(state, wrapWidth);
+      return moveLeft(state);
     case 'moveRight':
-      return moveRight(state, wrapWidth);
+      return moveRight(state);
     case 'moveUp':
       return moveUp(state, wrapWidth);
     case 'moveDown':
