@@ -1,13 +1,13 @@
 import React from 'react';
-import { Box, useWindowSize } from 'ink';
+import { Box, Text, useWindowSize } from 'ink';
 import Greeting from './Greeting';
 import PromptInput from './PromptInput';
 
 export default function Screen() {
   const { columns, rows } = useWindowSize();
 
-
   const inputHeight = Math.max(4, Math.ceil(rows * 0.20));
+  const separatorWidth = Math.max(0, columns - 2); // inside screen padding={1}
 
   return (
     <Box
@@ -20,10 +20,11 @@ export default function Screen() {
         <Greeting />
       </Box>
 
+      <Text>{"─".repeat(separatorWidth)}</Text>
+
       <Box
         justifyContent="flex-start"
         height={inputHeight}
-        paddingBottom={1}
         paddingTop={1}
         paddingLeft={3}
         paddingRight={3}
