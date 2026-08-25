@@ -12,7 +12,7 @@ class WriteDistPackageJsonPlugin {
   apply(compiler) {
     compiler.hooks.afterEmit.tap('WriteDistPackageJsonPlugin', () => {
       const src = JSON.parse(
-        fs.readFileSync(path.join(ROOT, 'minimacli/package.json'), 'utf8')
+        fs.readFileSync(path.join(ROOT, 'apps/minimacli/package.json'), 'utf8')
       );
       const distPkg = {
         name: src.name,
@@ -34,7 +34,7 @@ class WriteDistPackageJsonPlugin {
 module.exports = {
   mode: 'production',
   target: 'node',
-  entry: path.resolve(ROOT, 'minimacli/src/main.tsx'),
+  entry: path.resolve(ROOT, 'apps/minimacli/src/main.tsx'),
   output: {
     path: path.resolve(ROOT, 'dist/minimacli'),
     filename: 'main.js',

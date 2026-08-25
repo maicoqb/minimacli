@@ -1,7 +1,7 @@
 {
   "name": "minimacli",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "minimacli/src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/minimacli/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -11,8 +11,8 @@
       "options": {
         "target": "node",
         "outputPath": "dist/minimacli",
-        "main": "minimacli/src/main.tsx",
-        "tsConfig": "minimacli/tsconfig.app.json",
+        "main": "apps/minimacli/src/main.tsx",
+        "tsConfig": "apps/minimacli/tsconfig.app.json",
         "webpackConfig": "webpack.config.cjs",
         "outputFileName": "main.js"
       }
