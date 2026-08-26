@@ -8,6 +8,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import { createHarness, type HarnessDescriptor, type HarnessStatus } from '../lib/harness';
+import { startEventLogging } from '../lib/eventLog';
 
 type HarnessContextValue = {
   status: HarnessStatus;
@@ -55,6 +56,21 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       ensureSession();
     }
   }, [status, sessionId, ensureSession]);
+
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+    const controller = new AbortController();
+    harness.streamEvents(
+      sessionId,
+      (frame) => console.error('Received frame:', frame),
+      controller.signal
+    );
+    return () => {
+      controller.abort();
+    };
+  }, [harness, sessionId]);
 
   const prompt = useCallback(
     async (text: string) => {

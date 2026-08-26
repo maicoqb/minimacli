@@ -28,6 +28,35 @@ type ServerResponse<T> =
 
 export type Harness = ReturnType<typeof createHarness>;
 
+export type MuxFrame = { type: string; sessionId?: string } & Record<string, unknown>;
+
+function toWsUrl(httpUrl: string, path: string): string {
+  const url = new URL(path, httpUrl);
+  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+  return url.toString();
+}
+
+export function streamEvents(
+  url: string,
+  sessionId: string,
+  onFrame: (frame: MuxFrame) => void,
+  signal?: AbortSignal
+): void {
+  const socket = new WebSocket(toWsUrl(url, '/api/events.mux'));
+  socket.onmessage = (event) => {
+    const data = event.data;
+    if (typeof data !== 'string') {
+      return;
+    }
+    const envelope = JSON.parse(data) as { payload?: unknown };
+    const frame = envelope.payload as MuxFrame | undefined;
+    if (frame && frame.sessionId === sessionId) {
+      onFrame(frame);
+    }
+  };
+  signal?.addEventListener('abort', () => socket.close());
+}
+
 export function describe(url: string): Promise<HarnessDescriptor> {
   return callRpc<HarnessDescriptor>(url, 'host.describe', {});
 }
@@ -49,6 +78,8 @@ export function createHarness(url: string) {
     describe: () => describe(url),
     createSession: (cwd?: string) => createSession(url, cwd),
     prompt: (sessionId: string, text: string) => prompt(url, sessionId, text),
+    streamEvents: (sessionId: string, onFrame: (frame: MuxFrame) => void, signal?: AbortSignal) =>
+      streamEvents(url, sessionId, onFrame, signal),
   };
 }
 

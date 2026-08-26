@@ -30,7 +30,7 @@ Journeys:
   - [x] 2.3 Empty input does not send.
   - [x] 2.4 Error: send fails → can try again.
 - [ ] **3. See the AI response** — response rendered.
-  - [ ] 3.1 Receive the turn's response.
+  - [x] 3.1 Receive the turn's response.
   - [ ] 3.2 Display the AI message (author + content).
   - [ ] 3.3 Cancel the in-progress action with Ctrl+C.
   - [ ] 3.4 Error: turn fails → clear message; TUI remains usable.
