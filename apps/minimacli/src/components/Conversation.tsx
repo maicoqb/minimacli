@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, Text, measureElement, useWindowSize } from 'ink';
 import Greeting from './Greeting';
+import Hr from './Hr';
 import { useInput } from '../hooks/useInput';
 import { useHarness } from '../context/HarnessContext';
 import { buildLines, clamp, sliceLines } from '../lib/text';
@@ -17,9 +18,18 @@ export default function Conversation() {
   const messageLines = messages.map((message) => {
     const prefix = message.role === 'user' ? '$ ' : '> ';
     const content = message.text;
-    return { message, prefix, content, lines: buildLines(content, Math.max(1, width - 2)) };
+    return {
+      message,
+      prefix,
+      content,
+      lines: buildLines(content, Math.max(1, width - 2)),
+      hasSeparator: message.role === 'user',
+    };
   });
-  const totalLines = messageLines.reduce((total, item) => total + item.lines.length, 0);
+  const totalLines = messageLines.reduce(
+    (total, item) => total + item.lines.length + (item.hasSeparator ? 1 : 0),
+    0
+  );
   const visibleHeight = Math.max(1, height);
 
   useEffect(() => {
@@ -54,29 +64,38 @@ export default function Conversation() {
   }
 
   let lineOffset = 0;
-  const visibleMessages = messageLines.flatMap(({ message, prefix, content, lines }) => {
-    const messageStart = lineOffset;
+  const visibleMessages = messageLines.flatMap(({ message, prefix, content, lines, hasSeparator }) => {
+    const separatorStart = lineOffset;
+    const messageStart = separatorStart + (hasSeparator ? 1 : 0);
     const messageEnd = messageStart + lines.length;
     lineOffset = messageEnd;
 
-    const from = Math.max(0, scrollTop - messageStart);
-    const to = Math.min(lines.length, scrollTop + visibleHeight - messageStart);
-    if (from >= to) {
-      return [];
+    const elements: React.ReactNode[] = [];
+    if (hasSeparator && separatorStart >= scrollTop && separatorStart < scrollTop + visibleHeight) {
+      elements.push(
+        <Box key={`separator-${separatorStart}`}>
+          <Hr width={width} />
+        </Box>
+      );
     }
 
-    const visibleContent = sliceLines(content, lines, from, to);
-
-    return [
-      <Box key={messageStart} flexDirection="row">
-        <Text color={message.role === 'user' ? 'cyan' : 'yellow'}>
-          {from === 0 ? prefix : '  '}
-        </Text>
-        <Box flexGrow={1}>
-          <Text>{visibleContent}</Text>
+    const from = Math.max(0, scrollTop - messageStart);
+    const to = Math.min(lines.length, scrollTop + visibleHeight - messageStart);
+    if (from < to) {
+      const visibleContent = sliceLines(content, lines, from, to);
+      elements.push(
+        <Box key={`message-${messageStart}`} flexDirection="row">
+          <Text color={message.role === 'user' ? 'cyan' : 'yellow'}>
+            {from === 0 ? prefix : '  '}
+          </Text>
+          <Box flexGrow={1}>
+            <Text>{visibleContent}</Text>
+          </Box>
         </Box>
-      </Box>,
-    ];
+      );
+    }
+
+    return elements;
   });
 
   return (

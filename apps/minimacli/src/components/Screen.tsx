@@ -1,8 +1,9 @@
 import React from 'react';
-import { Box, Text, useWindowSize } from 'ink';
+import { Box, useWindowSize } from 'ink';
 import Conversation from './Conversation';
 import PromptInput from './PromptInput';
 import HarnessStatus from './HarnessStatus';
+import Hr from './Hr';
 
 const SCREEN_PADDING = 1;
 const SEPARATOR_HEIGHT = 1;
@@ -32,7 +33,7 @@ export default function Screen() {
         <Conversation />
       </Box>
 
-      <Text>{"─".repeat(separatorWidth)}</Text>
+      <Hr width={separatorWidth} />
 
       <Box width="100%" justifyContent="flex-start" paddingLeft={3} paddingRight={3}>
         <HarnessStatus />
