@@ -4,14 +4,18 @@ import { keyToken } from './keys';
 export type CommandAction =
   | { type: 'retry' }
   | { type: 'submit' }
+  | { type: 'scrollPageUp' }
+  | { type: 'scrollPageDown' }
   | { type: 'scrollUp' }
   | { type: 'scrollDown' };
 
 export const keymap: Record<string, CommandAction | null> = {
   'ctrl+r': { type: 'retry' },
   enter: { type: 'submit' },
-  pageup: { type: 'scrollUp' },
-  pagedown: { type: 'scrollDown' },
+  pageup: { type: 'scrollPageUp' },
+  pagedown: { type: 'scrollPageDown' },
+  'ctrl+up': { type: 'scrollUp' },
+  'ctrl+down': { type: 'scrollDown' },
 };
 
 export function resolveKey(input: string, key: Key): CommandAction | null {

@@ -35,11 +35,17 @@ export default function Conversation() {
   }, [messages.length, visibleHeight, totalLines]);
 
   onInput((action) => {
+    if (action.type === 'scrollPageUp') {
+      setScrollTop((current) => clamp(current - visibleHeight));
+    }
+    if (action.type === 'scrollPageDown') {
+      setScrollTop((current) => clamp(current + visibleHeight, totalLines - visibleHeight));
+    }
     if (action.type === 'scrollUp') {
-      setScrollTop((current) => clamp(current - visibleHeight, totalLines - visibleHeight));
+      setScrollTop((current) => clamp(current - 1, totalLines - visibleHeight));
     }
     if (action.type === 'scrollDown') {
-      setScrollTop((current) => clamp(current + visibleHeight, totalLines - visibleHeight));
+      setScrollTop((current) => clamp(current + 1, totalLines - visibleHeight));
     }
   });
 
