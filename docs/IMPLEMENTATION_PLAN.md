@@ -29,14 +29,14 @@ Journeys:
   - [x] 2.2 Send with Enter.
   - [x] 2.3 Empty input does not send.
   - [x] 2.4 Error: send fails → can try again.
-- [ ] **3. See the AI response** — response rendered.
+- [x] **3. See the AI response** — response rendered.
   - [x] 3.1 Receive the turn's response.
   - [x] 3.2 Display the AI message (author + content).
   - [x] 3.3 Cancel the in-progress action with Ctrl+C.
   - [x] 3.4 Error: turn fails → TUI remains usable.
-  - [ ] 3.5 Error: connection drops during the turn → TUI remains usable.
+  - [x] 3.5 Error: connection drops during the turn → TUI remains usable.
 - [ ] **4. AI approval** — the AI asks permission to execute.
-  - [ ] 4.1 Display the approval to the user.
+  - [] 4.1 Display the approval to the user.
   - [ ] 4.2 Show what will be done (command/action).
   - [ ] 4.3 Choose the option: allow, deny, abort — Y, N, Ctrl+C.
   - [ ] 4.4 Error: approval expires → clear message.
