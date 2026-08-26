@@ -3,11 +3,11 @@ import { Box, Text, measureElement, useWindowSize } from 'ink';
 import Greeting from './Greeting';
 import Hr from './Hr';
 import { useInput } from '../hooks/useInput';
-import { useHarness } from '../context/HarnessContext';
+import { useSession } from '../context/SessionContext';
 import { buildLines, clamp, sliceLines } from '../lib/text';
 
 export default function Conversation() {
-  const { messages } = useHarness();
+  const { messages } = useSession();
   const onInput = useInput();
   const [height, setHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);

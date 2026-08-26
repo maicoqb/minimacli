@@ -8,9 +8,8 @@ import React, {
   type ReactNode,
 } from 'react';
 import { createHarness, type HarnessDescriptor, type HarnessStatus } from '../lib/harness';
-import { parseMessageEvent, type ParseMessageEventResult } from '../lib/events';
 
-export type ChatMessage = { role: 'user' | 'assistant'; text: string };
+export type { ChatMessage } from '../lib/messages';
 
 type HarnessContextValue = {
   status: HarnessStatus;
@@ -18,32 +17,7 @@ type HarnessContextValue = {
   descriptor: HarnessDescriptor | null;
   url: string;
   retry: () => void;
-  prompt: (text: string) => Promise<void>;
-  cancel: () => Promise<void>;
-  messages: ChatMessage[];
-  isTurnActive: boolean;
 };
-
-type DeltaAction = Extract<ParseMessageEventResult, { kind: 'assistant-delta' }>;
-type CompleteAction = Extract<ParseMessageEventResult, { kind: 'assistant-complete' }>;
-
-function mutateAssistantMessage(
-  action: DeltaAction | CompleteAction
-): (current: ChatMessage[]) => ChatMessage[] {
-  return (current) => {
-    const last = current[current.length - 1];
-    if (last?.role !== 'assistant') {
-      return [...current, { role: 'assistant', text: action.text }];
-    }
-
-    const text =
-      action.kind === 'assistant-delta' ? last.text + action.text : action.text;
-    const updated = { ...last, text };
-    const copy = current.slice();
-    copy[copy.length - 1] = updated;
-    return copy;
-  };
-}
 
 const HarnessContext = createContext<HarnessContextValue | null>(null);
 
@@ -51,9 +25,6 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
   const harness = useMemo(() => createHarness(url), [url]);
   const [status, setStatus] = useState<HarnessStatus>('checking');
   const [descriptor, setDescriptor] = useState<HarnessDescriptor | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isTurnActive, setIsTurnActive] = useState(false);
 
   const retry = useCallback(async () => {
     setStatus('checking');
@@ -70,78 +41,6 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
     retry();
   }, [retry]);
 
-  const ensureSession = useCallback(async () => {
-    try {
-      const session = await harness.createSession(process.cwd());
-      setSessionId(session.sessionId);
-    } catch {
-      setStatus('down');
-    }
-  }, [harness]);
-
-  useEffect(() => {
-    if (status === 'up' && !sessionId) {
-      ensureSession();
-    }
-  }, [status, sessionId, ensureSession]);
-
-  useEffect(() => {
-    if (!sessionId || status !== 'up') {
-      return;
-    }
-    const controller = new AbortController();
-    let closedByAbortSignal = false;
-    harness.streamEvents(
-      sessionId,
-      (frame) => {
-        if (frame.type !== 'session/event') {
-          return;
-        }
-        const action = parseMessageEvent(frame.event);
-        switch (action?.kind) {
-          case 'assistant-delta':
-            setMessages(mutateAssistantMessage(action));
-            break;
-          case 'assistant-complete':
-            setMessages(mutateAssistantMessage(action));
-            setIsTurnActive(false);
-            break;
-        }
-      },
-      controller.signal,
-      () => {
-        if (closedByAbortSignal) {
-          return;
-        }
-        setIsTurnActive(false);
-        setStatus('down');
-      }
-    );
-    return () => {
-      closedByAbortSignal = true;
-      controller.abort();
-    };
-  }, [harness, sessionId, status]);
-
-  const prompt = useCallback(
-    async (text: string) => {
-      if (!sessionId) {
-        throw new Error('no session');
-      }
-      setIsTurnActive(true);
-      setMessages((current) => [...current, { role: 'user', text }]);
-      await harness.prompt(sessionId, text);
-    },
-    [harness, sessionId]
-  );
-
-  const cancel = useCallback(async () => {
-    if (!sessionId) {
-      return;
-    }
-    await harness.cancel(sessionId);
-  }, [harness, sessionId]);
-
   const value = useMemo<HarnessContextValue>(
     () => ({
       status,
@@ -149,12 +48,8 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       descriptor,
       url,
       retry,
-      prompt,
-      cancel,
-      messages,
-      isTurnActive,
     }),
-    [status, descriptor, url, retry, prompt, cancel, messages, isTurnActive]
+    [status, descriptor, url, retry]
   );
 
   return <HarnessContext.Provider value={value}>{children}</HarnessContext.Provider>;

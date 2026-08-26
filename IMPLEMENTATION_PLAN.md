@@ -107,5 +107,6 @@ yet:
 - **Usage / time** — show a line per assistant message.
 - **Tips on greetings** — show tips about how to use on greetings
 - **Recover a lost mid-turn turn** — settle interrupted turn state after reconnect.
+- **Cap rendered message history** — avoid unbounded history that hurts memory/performance.
 
 

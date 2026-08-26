@@ -94,6 +94,17 @@ export function createHarness(url: string) {
   };
 }
 
+const harnessCache = new Map<string, Harness>();
+
+export function getHarness(url: string): Harness {
+  let harness = harnessCache.get(url);
+  if (!harness) {
+    harness = createHarness(url);
+    harnessCache.set(url, harness);
+  }
+  return harness;
+}
+
 async function callRpc<T>(url: string, method: string, payload: unknown): Promise<T> {
   const message = {
     type: 'client-request',

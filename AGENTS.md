@@ -15,6 +15,8 @@ See [`README.md`](README.md) for goals and surfaces.
 - **Prefer self-explanatory code over comments.**
 - TypeScript + React (Ink) + Nx monorepo. Follow existing style (Prettier,
   ESLint).
+- **Use `async`/`await`, not `.then()`/`.catch()` chains.**
+- **`IMPLEMENTATION_PLAN.md` items:** title at most 5 words, description at most 10 words.
 
 ## Repository layout
 

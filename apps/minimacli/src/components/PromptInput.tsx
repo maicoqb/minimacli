@@ -3,21 +3,21 @@ import { Box, Text } from 'ink';
 import TextArea from './TextArea';
 import { useInput } from '../hooks/useInput';
 import { useLoadingDots } from '../hooks/useLoadingDots';
-import { useExitOnCtrlC } from '../hooks/useExitOnCtrlC';
-import { useHarness } from '../context/HarnessContext';
+import { useCtrlCHandler } from '../hooks/useCtrlCHandler';
+import { useSession } from '../context/SessionContext';
 
 const BORDER = 1;
 const PADDING = 1;
 
 export default function PromptInput() {
-  const { ready, prompt, isTurnActive } = useHarness();
+  const { isReady, prompt, isTurnActive } = useSession();
   const onInput = useInput();
-  const exitPending = useExitOnCtrlC();
+  const exitPending = useCtrlCHandler();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const dots = useLoadingDots(isTurnActive);
 
-  const sendBlocked = !ready || isTurnActive;
+  const sendBlocked = !isReady || isTurnActive;
 
   async function handleSend(text: string) {
     setError(null);
@@ -48,7 +48,7 @@ export default function PromptInput() {
       paddingRight={PADDING}
       flexDirection="column"
     >
-      <TextArea value={value} onChange={setValue} disabled={!ready} />
+      <TextArea value={value} onChange={setValue} disabled={!isReady} />
       {exitPending ? (
         <Box paddingLeft={1}>
           <Text color="yellow">press Ctrl+C again to exit</Text>

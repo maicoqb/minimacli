@@ -1,11 +1,11 @@
 import { useApp, useInput as useInkInput } from 'ink';
 import { useState } from 'react';
-import { useHarness } from '../context/HarnessContext';
 import { keyToken } from '../lib/keys';
 import { useInput } from './useInput';
+import { useSession } from '../context/SessionContext';
 
-export function useExitOnCtrlC() {
-  const { isTurnActive, cancel } = useHarness();
+export function useCtrlCHandler() {
+  const { isTurnActive, interrupt } = useSession();
   const { exit } = useApp();
   const onInput = useInput();
   const [exitPending, setExitPending] = useState(false);
@@ -24,7 +24,7 @@ export function useExitOnCtrlC() {
     }
     if (isTurnActive && !cancelled) {
       setCancelled(true);
-      cancel().catch(() => undefined);
+      interrupt().catch(() => undefined);
       return;
     }
     if (exitPending) {
