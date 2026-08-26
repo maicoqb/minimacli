@@ -20,6 +20,7 @@ type HarnessContextValue = {
   retry: () => void;
   prompt: (text: string) => Promise<void>;
   messages: ChatMessage[];
+  isTurnActive: boolean;
 };
 
 type DeltaAction = Extract<ParseMessageEventResult, { kind: 'assistant-delta' }>;
@@ -51,6 +52,7 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
   const [descriptor, setDescriptor] = useState<HarnessDescriptor | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isTurnActive, setIsTurnActive] = useState(false);
 
   const retry = useCallback(async () => {
     setStatus('checking');
@@ -96,8 +98,11 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
         const action = parseMessageEvent(frame.event);
         switch (action?.kind) {
           case 'assistant-delta':
+            setMessages(mutateAssistantMessage(action));
+            break;
           case 'assistant-complete':
             setMessages(mutateAssistantMessage(action));
+            setIsTurnActive(false);
             break;
         }
       },
@@ -113,6 +118,7 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       if (!sessionId) {
         throw new Error('no session');
       }
+      setIsTurnActive(true);
       setMessages((current) => [...current, { role: 'user', text }]);
       await harness.prompt(sessionId, text);
     },
@@ -128,8 +134,9 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       retry,
       prompt,
       messages,
+      isTurnActive,
     }),
-    [status, descriptor, url, retry, prompt, messages]
+    [status, descriptor, url, retry, prompt, messages, isTurnActive]
   );
 
   return <HarnessContext.Provider value={value}>{children}</HarnessContext.Provider>;
