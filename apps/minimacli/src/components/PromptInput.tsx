@@ -6,7 +6,7 @@ import { type TextAreaKeyAction } from '../lib/input';
 const BORDER = 1;
 const PADDING = 1;
 
-export default function PromptInput() {
+export default function PromptInput({ disabled = false }: { disabled?: boolean }) {
   const [value, setValue] = useState('');
 
   function onKey(_: string, key: Key): boolean | TextAreaKeyAction {
@@ -27,7 +27,7 @@ export default function PromptInput() {
       paddingLeft={PADDING}
       paddingRight={PADDING}
     >
-      <TextArea value={value} onChange={setValue} onKey={onKey} />
+      <TextArea value={value} onChange={setValue} onKey={onKey} disabled={disabled} />
     </Box>
   );
 }

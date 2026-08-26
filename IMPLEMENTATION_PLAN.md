@@ -18,12 +18,12 @@ Done criteria: end-to-end conversation — send, respond, approve, and cancel.
 
 Journeys:
 
-- [ ] **1. Open/Close CLI** — opens and closes the TUI.
+- [x] **1. Open/Close CLI** — opens and closes the TUI.
   - [x] 1.1 Show greeting.
   - [x] 1.2 Show text input prompt.
   - [x] 1.3 Connect to the running server.
-  - [ ] 1.4 Ctrl+C exits the TUI — with no turn in progress.
-  - [ ] 1.5 Error: server unreachable → clear message; TUI does not open.
+  - [x] 1.4 Ctrl+C exits the TUI — with no turn in progress.
+  - [x] 1.5 Error: server unreachable status
 - [ ] **2. Send message to the AI** — prompt sent by the TUI.
   - [ ] 2.1 Type text in the input.
   - [ ] 2.2 Send with Enter — sends the prompt and clears the input.

@@ -1,41 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Text } from 'ink';
-import {
-  describeHarness,
-  formatWorkspace,
-  DEFAULT_HARNESS_URL,
-  type HarnessDescriptor,
-  type HarnessStatus,
-} from '../lib/harness';
+import React, { useEffect } from 'react';
+import { Box, Text, useInput } from 'ink';
+import { formatWorkspace, type HarnessStatus } from '../lib/harness';
+import useHarness from '../hooks/useHarness';
 
-export default function HarnessStatus({ url = DEFAULT_HARNESS_URL }: { url?: string }) {
-  const [status, setStatus] = useState<HarnessStatus>('checking');
-  const [descriptor, setDescriptor] = useState<HarnessDescriptor | null>(null);
+type Props = {
+  onReady: (ready: boolean) => void;
+};
+
+export default function HarnessStatus({ onReady }: Props) {
+  const { status, descriptor, url, retry } = useHarness();
 
   useEffect(() => {
-    let active = true;
-    describeHarness(url)
-      .then((value) => {
-        if (active) {
-          setDescriptor(value);
-          setStatus('up');
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setStatus('down');
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [url]);
+    onReady(status === 'up');
+  }, [status, onReady]);
+
+  useInput(
+    (input) => {
+      if (input === 'r') {
+        retry();
+      }
+    },
+    { isActive: status === 'down' }
+  );
 
   if (status === 'checking') {
     return <Text color="gray">connecting to harness…</Text>;
   }
   if (status === 'down') {
-    return <Text color="red">✖ harness unreachable at {url}</Text>;
+    return <Text color="red">x harness unreachable at {url} - press r to retry</Text>;
   }
   return (
     <Box width="100%" flexDirection="row" justifyContent="space-between">

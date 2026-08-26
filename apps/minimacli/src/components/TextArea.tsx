@@ -7,9 +7,10 @@ type TextAreaProps = {
   value: string;
   onChange: (value: string) => void;
   onKey?: (input: string, key: Key) => boolean | TextAreaKeyAction;
+  disabled?: boolean;
 };
 
-export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
+export default function TextArea({ value, onChange, onKey, disabled = false }: TextAreaProps) {
   const [cursor, setCursor] = useState(0);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [width, setWidth] = useState(0);
@@ -69,25 +70,28 @@ export default function TextArea({ value, onChange, onKey }: TextAreaProps) {
     });
   }
 
-  useInput((input, key) => {
-    if (key.pageUp) {
-      scrollBy(-visibleHeight);
-      return;
-    }
-    if (key.pageDown) {
-      scrollBy(visibleHeight);
-      return;
-    }
-    const result = onKey ? onKey(input, key) : true;
-    if (result === false) {
-      return;
-    }
-    const action = result === true ? defaultKeyAction(input, key) : result;
-    if (!action) {
-      return;
-    }
-    handle({ value, cursor }, action);
-  });
+  useInput(
+    (input, key) => {
+      if (key.pageUp) {
+        scrollBy(-visibleHeight);
+        return;
+      }
+      if (key.pageDown) {
+        scrollBy(visibleHeight);
+        return;
+      }
+      const result = onKey ? onKey(input, key) : true;
+      if (result === false) {
+        return;
+      }
+      const action = result === true ? defaultKeyAction(input, key) : result;
+      if (!action) {
+        return;
+      }
+      handle({ value, cursor }, action);
+    },
+    { isActive: !disabled }
+  );
 
   const visible = sliceLines(value, lines, scrollTop, scrollTop + visibleHeight);
 
