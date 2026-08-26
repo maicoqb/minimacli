@@ -28,6 +28,16 @@ HTTP/WebSocket API and never boot their own harness profile.
 - **VS Code extension** (`minimacli`) — a webview chat panel plus an integrated
   terminal running the same CLI wrapper.
 
+## Running
+
+### minimacli TUI
+
+```sh
+npx nx build minimacli
+npm i -g ./dist/minimacli
+npx minimacli
+```
+
 ## Architecture
 
 The full architecture — lifecycle, watcher, ledger and open questions — lives
