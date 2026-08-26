@@ -63,23 +63,8 @@ export default function TextArea({ value, onChange, onKey, disabled = false }: T
     onChange(next.value);
   }
 
-  function scrollBy(delta: number) {
-    setScrollTop((current) => {
-      const maxScroll = Math.max(0, lines.length - visibleHeight);
-      return clamp(current + delta, maxScroll);
-    });
-  }
-
   useInput(
     (input, key) => {
-      if (key.pageUp) {
-        scrollBy(-visibleHeight);
-        return;
-      }
-      if (key.pageDown) {
-        scrollBy(visibleHeight);
-        return;
-      }
       const result = onKey ? onKey(input, key) : true;
       if (result === false) {
         return;
