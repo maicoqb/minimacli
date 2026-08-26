@@ -7,9 +7,10 @@ type ScrollableProps<T> = {
   lines: T[];
   width: number;
   renderLine: (line: T) => React.ReactNode;
+  focusIndex?: number;
 };
 
-export default function Scrollable<T>({ lines, width, renderLine }: ScrollableProps<T>) {
+export default function Scrollable<T>({ lines, width, renderLine, focusIndex }: ScrollableProps<T>) {
   const viewportRef = useRef(null);
   const [height, setHeight] = useState(0);
   const { columns, rows } = useWindowSize();
@@ -17,6 +18,7 @@ export default function Scrollable<T>({ lines, width, renderLine }: ScrollablePr
 
   const totalLines = lines.length;
   const visibleHeight = Math.max(1, height);
+  const maxScroll = focusIndex ?? Math.max(0, totalLines - visibleHeight);
 
   useEffect(() => {
     const node = viewportRef.current;
@@ -27,8 +29,8 @@ export default function Scrollable<T>({ lines, width, renderLine }: ScrollablePr
   }, [columns, rows, lines]);
 
   useEffect(() => {
-    setScrollTop(Math.max(0, totalLines - visibleHeight));
-  }, [totalLines, visibleHeight]);
+    setScrollTop(focusIndex ?? Math.max(0, totalLines - visibleHeight));
+  }, [focusIndex, lines, totalLines, visibleHeight]);
 
   const onInput = useInput();
   onInput((action) => {
@@ -36,13 +38,13 @@ export default function Scrollable<T>({ lines, width, renderLine }: ScrollablePr
       setScrollTop((current) => clamp(current - visibleHeight));
     }
     if (action.type === 'scrollPageDown') {
-      setScrollTop((current) => clamp(current + visibleHeight, totalLines - visibleHeight));
+      setScrollTop((current) => clamp(current + visibleHeight, maxScroll));
     }
     if (action.type === 'scrollUp') {
-      setScrollTop((current) => clamp(current - 1, totalLines - visibleHeight));
+      setScrollTop((current) => clamp(current - 1, maxScroll));
     }
     if (action.type === 'scrollDown') {
-      setScrollTop((current) => clamp(current + 1, totalLines - visibleHeight));
+      setScrollTop((current) => clamp(current + 1, maxScroll));
     }
   });
 

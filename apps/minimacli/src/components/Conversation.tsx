@@ -8,7 +8,7 @@ import { buildLines, sliceLines } from '../lib/text';
 import type { ChatMessageRole } from '../lib/messages';
 
 type DisplayLine =
-  | { kind: 'text'; text: string; role: ChatMessageRole; hasPrefix: boolean }
+  | { kind: 'text' | 'approval'; text: string; role: ChatMessageRole; hasPrefix: boolean }
   | { kind: 'separator' };
 
 export default function Conversation() {
@@ -17,23 +17,31 @@ export default function Conversation() {
   const width = Math.max(1, columns - 2);
   const PREFIX_WIDTH = 2;
 
-  const lines = useMemo(() => {
+  const { lines, focusIndex } = useMemo(() => {
     const result: DisplayLine[] = [];
+    let approvalStartIndex: number | undefined;
+    const hasActiveApproval = messages[messages.length - 1]?.kind === 'approval';
+
     for (const message of messages) {
       if (message.role === 'user') {
         result.push({ kind: 'separator' });
       }
       const built = buildLines(message.text, Math.max(1, width - PREFIX_WIDTH));
+      const kind = message.kind === 'approval' ? 'approval' : 'text';
       for (let i = 0; i < built.length; i++) {
         result.push({
-          kind: 'text',
+          kind,
           text: sliceLines(message.text, built, i, i + 1).replace(/\n$/, ''),
           role: message.role,
           hasPrefix: i === 0,
         });
+        if (hasActiveApproval && kind === 'approval' && i === 0) {
+          approvalStartIndex = result.length - 1;
+        }
       }
     }
-    return result;
+
+    return { lines: result, focusIndex: approvalStartIndex };
   }, [messages, width]);
 
   if (messages.length === 0) {
@@ -48,7 +56,9 @@ export default function Conversation() {
     const prefix = isUser ? '$ ' : '> ';
     return (
       <Box width={width} flexDirection="row">
-        <Text color={isUser ? 'cyan' : 'yellow'}>{line.hasPrefix ? prefix : '  '}</Text>
+        <Text color={line.kind === 'approval' ? 'magenta' : isUser ? 'cyan' : 'yellow'}>
+          {line.hasPrefix ? prefix : '  '}
+        </Text>
         <Box flexGrow={1}>
           <Text>{line.text}</Text>
         </Box>
@@ -56,5 +66,5 @@ export default function Conversation() {
     );
   }
 
-  return <Scrollable lines={lines} width={width} renderLine={renderLine} />;
+  return <Scrollable lines={lines} width={width} renderLine={renderLine} focusIndex={focusIndex} />;
 }
