@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Box, Text, type Key } from 'ink';
+import { Box, Text } from 'ink';
 import TextArea from './TextArea';
+import { useInput } from '../hooks/useInput';
 import { useHarness } from '../context/HarnessContext';
-import { type TextAreaKeyAction } from '../lib/input';
 
 const BORDER = 1;
 const PADDING = 1;
 
 export default function PromptInput() {
   const { ready, prompt } = useHarness();
+  const onInput = useInput();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -22,16 +23,11 @@ export default function PromptInput() {
     }
   }
 
-  function onKey(_: string, key: Key): boolean | TextAreaKeyAction {
-    if (key.return) {
-      if (value.trim() === '') {
-        return false;
-      }
+  onInput((action) => {
+    if (action.type === 'submit' && value.trim() !== '') {
       handleSend(value);
-      return false;
     }
-    return true;
-  }
+  });
 
   return (
     <Box
@@ -43,7 +39,7 @@ export default function PromptInput() {
       paddingRight={PADDING}
       flexDirection="column"
     >
-      <TextArea value={value} onChange={setValue} onKey={onKey} disabled={!ready} />
+      <TextArea value={value} onChange={setValue} disabled={!ready} />
       {error ? (
         <Box paddingLeft={1}>
           <Text color="red">{error}</Text>

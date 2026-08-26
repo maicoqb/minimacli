@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Text, measureElement, useInput, useWindowSize } from 'ink';
+import { Box, Text, measureElement, useWindowSize } from 'ink';
 import Greeting from './Greeting';
+import { useInput } from '../hooks/useInput';
 import { useHarness } from '../context/HarnessContext';
 import { buildLines, clamp, sliceLines } from '../lib/text';
 
 export default function Conversation() {
   const { messages } = useHarness();
+  const onInput = useInput();
   const [height, setHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const ref = useRef(null);
@@ -32,11 +34,11 @@ export default function Conversation() {
     setScrollTop(Math.max(0, totalLines - visibleHeight));
   }, [messages.length, visibleHeight, totalLines]);
 
-  useInput((_, key) => {
-    if (key.pageUp) {
+  onInput((action) => {
+    if (action.type === 'scrollUp') {
       setScrollTop((current) => clamp(current - visibleHeight, totalLines - visibleHeight));
     }
-    if (key.pageDown) {
+    if (action.type === 'scrollDown') {
       setScrollTop((current) => clamp(current + visibleHeight, totalLines - visibleHeight));
     }
   });

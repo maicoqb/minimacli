@@ -1,16 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Text, useInput, useCursor, useWindowSize, measureElement, type Key } from 'ink';
+import { Box, Text, useInput, useCursor, useWindowSize, measureElement } from 'ink';
 import { buildLines, sliceLines, idxToPos, clamp } from '../lib/text';
-import { applyKeyAction, defaultKeyAction, type TextAreaKeyAction } from '../lib/input';
+import { applyKeyAction, defaultKeyAction, type EditorAction } from '../lib/editorInput';
 
 type TextAreaProps = {
   value: string;
   onChange: (value: string) => void;
-  onKey?: (input: string, key: Key) => boolean | TextAreaKeyAction;
   disabled?: boolean;
 };
 
-export default function TextArea({ value, onChange, onKey, disabled = false }: TextAreaProps) {
+export default function TextArea({ value, onChange, disabled = false }: TextAreaProps) {
   const [cursor, setCursor] = useState(0);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [width, setWidth] = useState(0);
@@ -57,7 +56,7 @@ export default function TextArea({ value, onChange, onKey, disabled = false }: T
     y: pos.y + Math.max(0, caret.row - scrollTop),
   });
 
-  function handle(state: { value: string; cursor: number }, action: TextAreaKeyAction) {
+  function handle(state: { value: string; cursor: number }, action: EditorAction) {
     const next = applyKeyAction(state, wrapWidth, action);
     setCursor(next.cursor);
     onChange(next.value);
@@ -65,11 +64,7 @@ export default function TextArea({ value, onChange, onKey, disabled = false }: T
 
   useInput(
     (input, key) => {
-      const result = onKey ? onKey(input, key) : true;
-      if (result === false) {
-        return;
-      }
-      const action = result === true ? defaultKeyAction(input, key) : result;
+      const action = defaultKeyAction(input, key);
       if (!action) {
         return;
       }

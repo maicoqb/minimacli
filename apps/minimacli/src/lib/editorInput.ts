@@ -1,4 +1,5 @@
 import type { Key } from 'ink';
+import { keyToken } from './keys';
 import {
   moveLeft,
   moveRight,
@@ -19,7 +20,7 @@ import {
   type EditorState,
 } from './editor';
 
-export type TextAreaKeyAction =
+export type EditorAction =
   | { type: 'insertNewline' }
   | { type: 'insert'; text: string }
   | { type: 'backspace' }
@@ -37,50 +38,30 @@ export type TextAreaKeyAction =
   | { type: 'homeAll' }
   | { type: 'endAll' };
 
-export function defaultKeyAction(input: string, key: Key): TextAreaKeyAction | null {
-  if (key.return) {
-    return key.ctrl ? { type: 'insertNewline' } : null;
+const keymap: Record<string, EditorAction | null> = {
+  'ctrl+enter': { type: 'insertNewline' },
+  'ctrl+left': { type: 'moveWordLeft' },
+  'ctrl+right': { type: 'moveWordRight' },
+  left: { type: 'moveLeft' },
+  right: { type: 'moveRight' },
+  up: { type: 'moveUp' },
+  down: { type: 'moveDown' },
+  'ctrl+home': { type: 'homeAll' },
+  'ctrl+end': { type: 'endAll' },
+  home: { type: 'homeLine' },
+  end: { type: 'endLine' },
+  'ctrl+backspace': { type: 'deleteWordLeft' },
+  'ctrl+delete': { type: 'deleteWordRight' },
+  backspace: { type: 'backspace' },
+  delete: { type: 'delete' },
+};
+
+export function defaultKeyAction(input: string, key: Key): EditorAction | null {
+  const mapped = keymap[keyToken(input, key)];
+  if (mapped) {
+    return mapped;
   }
-  if (key.ctrl && key.leftArrow) {
-    return { type: 'moveWordLeft' };
-  }
-  if (key.ctrl && key.rightArrow) {
-    return { type: 'moveWordRight' };
-  }
-  if (key.leftArrow) {
-    return { type: 'moveLeft' };
-  }
-  if (key.rightArrow) {
-    return { type: 'moveRight' };
-  }
-  if (key.upArrow) {
-    return { type: 'moveUp' };
-  }
-  if (key.downArrow) {
-    return { type: 'moveDown' };
-  }
-  if (key.home || key.end) {
-    return key.ctrl
-      ? key.home
-        ? { type: 'homeAll' }
-        : { type: 'endAll' }
-      : key.home
-        ? { type: 'homeLine' }
-        : { type: 'endLine' };
-  }
-  if (key.ctrl && key.backspace) {
-    return { type: 'deleteWordLeft' };
-  }
-  if (key.ctrl && key.delete) {
-    return { type: 'deleteWordRight' };
-  }
-  if (key.backspace) {
-    return { type: 'backspace' };
-  }
-  if (key.delete) {
-    return { type: 'delete' };
-  }
-  if (key.ctrl) {
+  if (key.ctrl || input === '') {
     return null;
   }
   return { type: 'insert', text: input };
@@ -89,7 +70,7 @@ export function defaultKeyAction(input: string, key: Key): TextAreaKeyAction | n
 export function applyKeyAction(
   state: EditorState,
   wrapWidth: number,
-  action: TextAreaKeyAction
+  action: EditorAction
 ): EditorState {
   switch (action.type) {
     case 'moveLeft':
