@@ -3,6 +3,7 @@ import { Box, Text } from 'ink';
 import TextArea from './TextArea';
 import { useInput } from '../hooks/useInput';
 import { useLoadingDots } from '../hooks/useLoadingDots';
+import { useExitOnCtrlC } from '../hooks/useExitOnCtrlC';
 import { useHarness } from '../context/HarnessContext';
 
 const BORDER = 1;
@@ -11,6 +12,7 @@ const PADDING = 1;
 export default function PromptInput() {
   const { ready, prompt, isTurnActive } = useHarness();
   const onInput = useInput();
+  const exitPending = useExitOnCtrlC();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const dots = useLoadingDots(isTurnActive);
@@ -50,6 +52,10 @@ export default function PromptInput() {
       {isTurnActive ? (
         <Box paddingLeft={1}>
           <Text color="yellow">waiting{dots}</Text>
+        </Box>
+      ) : exitPending ? (
+        <Box paddingLeft={1}>
+          <Text color="yellow">press Ctrl+C again to exit</Text>
         </Box>
       ) : error ? (
         <Box paddingLeft={1}>

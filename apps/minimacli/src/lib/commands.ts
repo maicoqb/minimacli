@@ -4,6 +4,7 @@ import { keyToken } from './keys';
 export type CommandAction =
   | { type: 'retry' }
   | { type: 'submit' }
+  | { type: 'cancel' }
   | { type: 'scrollPageUp' }
   | { type: 'scrollPageDown' }
   | { type: 'scrollUp' }
@@ -12,6 +13,7 @@ export type CommandAction =
 export const keymap: Record<string, CommandAction | null> = {
   'ctrl+r': { type: 'retry' },
   enter: { type: 'submit' },
+  'ctrl+c': { type: 'cancel' },
   pageup: { type: 'scrollPageUp' },
   pagedown: { type: 'scrollPageDown' },
   'ctrl+up': { type: 'scrollUp' },

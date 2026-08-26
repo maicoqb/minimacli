@@ -73,11 +73,16 @@ export function prompt(url: string, sessionId: string, text: string): Promise<Pr
   });
 }
 
+export function cancel(url: string, sessionId: string): Promise<{ accepted: true }> {
+  return callRpc<{ accepted: true }>(url, 'session.cancel', { sessionId });
+}
+
 export function createHarness(url: string) {
   return {
     describe: () => describe(url),
     createSession: (cwd?: string) => createSession(url, cwd),
     prompt: (sessionId: string, text: string) => prompt(url, sessionId, text),
+    cancel: (sessionId: string) => cancel(url, sessionId),
     streamEvents: (sessionId: string, onFrame: (frame: MuxFrame) => void, signal?: AbortSignal) =>
       streamEvents(url, sessionId, onFrame, signal),
   };

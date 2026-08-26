@@ -19,6 +19,7 @@ type HarnessContextValue = {
   url: string;
   retry: () => void;
   prompt: (text: string) => Promise<void>;
+  cancel: () => Promise<void>;
   messages: ChatMessage[];
   isTurnActive: boolean;
 };
@@ -125,6 +126,13 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
     [harness, sessionId]
   );
 
+  const cancel = useCallback(async () => {
+    if (!sessionId) {
+      return;
+    }
+    await harness.cancel(sessionId);
+  }, [harness, sessionId]);
+
   const value = useMemo<HarnessContextValue>(
     () => ({
       status,
@@ -133,10 +141,11 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       url,
       retry,
       prompt,
+      cancel,
       messages,
       isTurnActive,
     }),
-    [status, descriptor, url, retry, prompt, messages, isTurnActive]
+    [status, descriptor, url, retry, prompt, cancel, messages, isTurnActive]
   );
 
   return <HarnessContext.Provider value={value}>{children}</HarnessContext.Provider>;

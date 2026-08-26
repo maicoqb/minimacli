@@ -32,7 +32,7 @@ Journeys:
 - [ ] **3. See the AI response** — response rendered.
   - [x] 3.1 Receive the turn's response.
   - [x] 3.2 Display the AI message (author + content).
-  - [ ] 3.3 Cancel the in-progress action with Ctrl+C.
+  - [x] 3.3 Cancel the in-progress action with Ctrl+C.
   - [ ] 3.4 Error: turn fails → clear message; TUI remains usable.
   - [ ] 3.5 Error: connection drops during the turn → clear message; TUI remains usable.
 - [ ] **4. AI approval** — the AI asks permission to execute.

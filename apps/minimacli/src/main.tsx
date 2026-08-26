@@ -8,5 +8,6 @@ import { DEFAULT_HARNESS_URL } from './lib/harness';
 render(
   <HarnessProvider url={DEFAULT_HARNESS_URL}>
     <Screen />
-  </HarnessProvider>
+  </HarnessProvider>,
+  { exitOnCtrlC: false }
 );
