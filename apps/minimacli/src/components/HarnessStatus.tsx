@@ -1,18 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Box, Text, useInput } from 'ink';
-import { formatWorkspace, type HarnessStatus } from '../lib/harness';
-import useHarness from '../hooks/useHarness';
+import { formatWorkspace } from '../lib/path';
+import { useHarness } from '../context/HarnessContext';
 
-type Props = {
-  onReady: (ready: boolean) => void;
-};
-
-export default function HarnessStatus({ onReady }: Props) {
+export default function HarnessStatus() {
   const { status, descriptor, url, retry } = useHarness();
-
-  useEffect(() => {
-    onReady(status === 'up');
-  }, [status, onReady]);
 
   useInput(
     (input) => {

@@ -12,41 +12,68 @@ export type HarnessDescriptor = {
   canOpenPath: boolean;
 };
 
-export function formatWorkspace(cwd: string, home: string): string {
-  const norm = (p: string) => p.replace(/\\/g, '/').replace(/\/+$/, '');
-  const c = norm(cwd);
-  const h = norm(home);
-  if (c === h) {
-    return '~';
-  }
-  if (c.startsWith(`${h}/`)) {
-    return `~${c.slice(h.length)}`;
-  }
-  return cwd;
-}
+export type SessionCreated = {
+  sessionId: string;
+  agentPreset?: string;
+};
 
-type ServerResponse =
-  | { type: 'server-response'; rpcId: string; result: { ok: true; value: HarnessDescriptor } }
+export type PromptAccepted = {
+  accepted: true;
+  command?: { kind: 'success'; text?: string };
+};
+
+type ServerResponse<T> =
+  | { type: 'server-response'; rpcId: string; result: { ok: true; value: T } }
   | { type: 'server-response'; rpcId: string; result: { ok: false; error: unknown } };
 
-export async function describeHarness(url: string): Promise<HarnessDescriptor> {
+export type Harness = ReturnType<typeof createHarness>;
+
+export function describe(url: string): Promise<HarnessDescriptor> {
+  return callRpc<HarnessDescriptor>(url, 'host.describe', {});
+}
+
+export function createSession(url: string, cwd?: string): Promise<SessionCreated> {
+  return callRpc<SessionCreated>(url, 'session.create', cwd ? { cwd } : {});
+}
+
+export function prompt(url: string, sessionId: string, text: string): Promise<PromptAccepted> {
+  return callRpc<PromptAccepted>(url, 'session.prompt', {
+    sessionId,
+    mode: 'queue',
+    content: [{ type: 'text', text }],
+  });
+}
+
+export function createHarness(url: string) {
+  return {
+    describe: () => describe(url),
+    createSession: (cwd?: string) => createSession(url, cwd),
+    prompt: (sessionId: string, text: string) => prompt(url, sessionId, text),
+  };
+}
+
+async function callRpc<T>(url: string, method: string, payload: unknown): Promise<T> {
   const message = {
     type: 'client-request',
     rpcId: crypto.randomUUID(),
-    method: 'host.describe',
-    payload: {},
+    method,
+    payload,
   };
-  const response = await fetch(`${url}/api/host.describe`, {
+  
+  const response = await fetch(`${url}/api/${method}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(message),
   });
+
   if (!response.ok) {
-    throw new Error(`host.describe failed: HTTP ${response.status}`);
+    throw new Error(`${method} failed: HTTP ${response.status}`);
   }
-  const body = (await response.json()) as ServerResponse;
+
+  const body = (await response.json()) as ServerResponse<T>;
   if (!body.result.ok) {
-    throw new Error('host.describe returned an error result');
+    throw new Error(`${method} returned an error result`);
   }
+
   return body.result.value;
 }

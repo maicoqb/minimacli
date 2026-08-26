@@ -25,10 +25,10 @@ Journeys:
   - [x] 1.4 Ctrl+C exits the TUI — with no turn in progress.
   - [x] 1.5 Error: server unreachable status
 - [ ] **2. Send message to the AI** — prompt sent by the TUI.
-  - [ ] 2.1 Type text in the input.
-  - [ ] 2.2 Send with Enter — sends the prompt and clears the input.
-  - [ ] 2.3 Empty input does not send.
-  - [ ] 2.4 Error: send fails → clear message; can try again.
+  - [x] 2.1 Type text in the input.
+  - [x] 2.2 Send with Enter.
+  - [x] 2.3 Empty input does not send.
+  - [x] 2.4 Error: send fails → can try again.
 - [ ] **3. See the AI response** — response rendered.
   - [ ] 3.1 Receive the turn's response.
   - [ ] 3.2 Display the AI message (author + content).
@@ -98,4 +98,7 @@ yet:
 - **Theme** — customizable colors and appearance for the TUI.
 - **Rename session** — rename the current session.
 - **Extract multiline editor to a package** — our input editor model (`apps/minimacli/src/lib/text.ts`) is a candidate to publish to te comunity;
-
+- **Read-only sessions** — sessions should start in read-only mode.
+- **Thinking off** — sessions should start with thinking disabled.
+- **Change session policy/sandbox** — change the sandbox/policy of a session.
+- **Change session thinking** — change the thinking setting of a session.

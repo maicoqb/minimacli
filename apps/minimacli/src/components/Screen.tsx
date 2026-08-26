@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Text, useWindowSize } from 'ink';
 import Greeting from './Greeting';
 import PromptInput from './PromptInput';
@@ -8,7 +8,6 @@ const SCREEN_PADDING = 1;
 
 export default function Screen() {
   const { columns, rows } = useWindowSize();
-  const [ready, setReady] = useState(false);
 
   const inputHeight = Math.max(4, Math.ceil(rows * 0.2));
   const separatorWidth = Math.max(0, columns - 2 * SCREEN_PADDING);
@@ -27,7 +26,7 @@ export default function Screen() {
       <Text>{"─".repeat(separatorWidth)}</Text>
 
       <Box width="100%" justifyContent="flex-start" paddingLeft={3} paddingRight={3}>
-        <HarnessStatus onReady={setReady} />
+        <HarnessStatus />
       </Box>
 
       <Box
@@ -36,7 +35,7 @@ export default function Screen() {
         paddingLeft={3}
         paddingRight={3}
       >
-        <PromptInput disabled={!ready} />
+        <PromptInput />
       </Box>
     </Box>
   );
