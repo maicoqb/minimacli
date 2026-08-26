@@ -109,5 +109,6 @@ yet:
 - **Recover a lost mid-turn turn** — settle interrupted turn state after reconnect.
 - **Cap rendered message history** — avoid unbounded history that hurts memory/performance.
 - **Strip markdown in message text** — approval `reason` can carry `**` formatting.
+- **Always show last user message** — pin the latest user message on screen.
 
 

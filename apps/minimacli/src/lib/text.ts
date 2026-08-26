@@ -66,7 +66,6 @@ export function posToIdx(lines: Line[], row: number, targetCol: number): number 
   return line.start + offset;
 }
 
-// Extract the substring of `value` spanning visual lines [from, to).
 export function sliceLines(value: string, lines: Line[], from: number, to: number): string {
   const start = lines[from]?.start ?? 0;
   const end = to < lines.length ? lines[to].start : value.length;

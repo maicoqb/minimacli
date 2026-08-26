@@ -1,106 +1,60 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, Text, measureElement, useWindowSize } from 'ink';
+import React, { useMemo } from 'react';
+import { Box, Text, useWindowSize } from 'ink';
 import Greeting from './Greeting';
 import Hr from './Hr';
-import { useInput } from '../hooks/useInput';
+import Scrollable from './Scrollable';
 import { useSession } from '../context/SessionContext';
-import { buildLines, clamp, sliceLines } from '../lib/text';
+import { buildLines, sliceLines } from '../lib/text';
+import type { ChatMessageRole } from '../lib/messages';
+
+type DisplayLine =
+  | { kind: 'text'; text: string; role: ChatMessageRole; hasPrefix: boolean }
+  | { kind: 'separator' };
 
 export default function Conversation() {
   const { messages } = useSession();
-  const onInput = useInput();
-  const [height, setHeight] = useState(0);
-  const [scrollTop, setScrollTop] = useState(0);
-  const ref = useRef(null);
-  const { columns, rows } = useWindowSize();
-
+  const { columns } = useWindowSize();
   const width = Math.max(1, columns - 2);
-  const messageLines = messages.map((message) => {
-    const prefix = message.role === 'user' ? '$ ' : '> ';
-    const content = message.text;
-    return {
-      message,
-      prefix,
-      content,
-      lines: buildLines(content, Math.max(1, width - 2)),
-      hasSeparator: message.role === 'user',
-    };
-  });
-  const totalLines = messageLines.reduce(
-    (total, item) => total + item.lines.length + (item.hasSeparator ? 1 : 0),
-    0
-  );
-  const visibleHeight = Math.max(1, height);
+  const PREFIX_WIDTH = 2;
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) {
-      return;
+  const lines = useMemo(() => {
+    const result: DisplayLine[] = [];
+    for (const message of messages) {
+      if (message.role === 'user') {
+        result.push({ kind: 'separator' });
+      }
+      const built = buildLines(message.text, Math.max(1, width - PREFIX_WIDTH));
+      for (let i = 0; i < built.length; i++) {
+        result.push({
+          kind: 'text',
+          text: sliceLines(message.text, built, i, i + 1).replace(/\n$/, ''),
+          role: message.role,
+          hasPrefix: i === 0,
+        });
+      }
     }
-    setHeight(measureElement(node).height);
-  }, [columns, rows, messages]);
-
-  useEffect(() => {
-    setScrollTop(Math.max(0, totalLines - visibleHeight));
-  }, [messages.length, visibleHeight, totalLines]);
-
-  onInput((action) => {
-    if (action.type === 'scrollPageUp') {
-      setScrollTop((current) => clamp(current - visibleHeight));
-    }
-    if (action.type === 'scrollPageDown') {
-      setScrollTop((current) => clamp(current + visibleHeight, totalLines - visibleHeight));
-    }
-    if (action.type === 'scrollUp') {
-      setScrollTop((current) => clamp(current - 1, totalLines - visibleHeight));
-    }
-    if (action.type === 'scrollDown') {
-      setScrollTop((current) => clamp(current + 1, totalLines - visibleHeight));
-    }
-  });
+    return result;
+  }, [messages, width]);
 
   if (messages.length === 0) {
     return <Greeting />;
   }
 
-  let lineOffset = 0;
-  const visibleMessages = messageLines.flatMap(({ message, prefix, content, lines, hasSeparator }) => {
-    const separatorStart = lineOffset;
-    const messageStart = separatorStart + (hasSeparator ? 1 : 0);
-    const messageEnd = messageStart + lines.length;
-    lineOffset = messageEnd;
-
-    const elements: React.ReactNode[] = [];
-    if (hasSeparator && separatorStart >= scrollTop && separatorStart < scrollTop + visibleHeight) {
-      elements.push(
-        <Box key={`separator-${separatorStart}`}>
-          <Hr width={width} />
-        </Box>
-      );
+  function renderLine(line: DisplayLine) {
+    if (line.kind === 'separator') {
+      return <Hr width={width} />;
     }
-
-    const from = Math.max(0, scrollTop - messageStart);
-    const to = Math.min(lines.length, scrollTop + visibleHeight - messageStart);
-    if (from < to) {
-      const visibleContent = sliceLines(content, lines, from, to);
-      elements.push(
-        <Box key={`message-${messageStart}`} flexDirection="row">
-          <Text color={message.role === 'user' ? 'cyan' : 'yellow'}>
-            {from === 0 ? prefix : '  '}
-          </Text>
-          <Box flexGrow={1}>
-            <Text>{visibleContent}</Text>
-          </Box>
+    const isUser = line.role === 'user';
+    const prefix = isUser ? '$ ' : '> ';
+    return (
+      <Box width={width} flexDirection="row">
+        <Text color={isUser ? 'cyan' : 'yellow'}>{line.hasPrefix ? prefix : '  '}</Text>
+        <Box flexGrow={1}>
+          <Text>{line.text}</Text>
         </Box>
-      );
-    }
+      </Box>
+    );
+  }
 
-    return elements;
-  });
-
-  return (
-    <Box ref={ref} flexGrow={1} alignSelf="stretch" flexDirection="column" overflow="hidden">
-      {visibleMessages}
-    </Box>
-  );
+  return <Scrollable lines={lines} width={width} renderLine={renderLine} />;
 }

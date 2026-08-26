@@ -1,3 +1,5 @@
+export type ChatMessageRole = 'user' | 'assistant';
+
 export type ChatTextMessage = {
   role: 'user' | 'assistant';
   kind: 'text';

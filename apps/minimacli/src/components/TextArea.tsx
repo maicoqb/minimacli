@@ -73,12 +73,21 @@ export default function TextArea({ value, onChange, disabled = false }: TextArea
     { isActive: !disabled }
   );
 
-  const visible = sliceLines(value, lines, scrollTop, scrollTop + visibleHeight);
+  const visibleLines = lines
+    .slice(scrollTop, scrollTop + visibleHeight)
+    .map((_, index) => {
+      const lineIndex = scrollTop + index;
+      return sliceLines(value, lines, lineIndex, lineIndex + 1).replace(/\n$/, '');
+    });
 
   return (
     <Box ref={ref} width="100%" flexGrow={1}>
-      <Box height={visibleHeight} overflow="hidden">
-        <Text>{visible}</Text>
+      <Box height={visibleHeight} overflow="hidden" flexDirection="column">
+        {visibleLines.map((line, index) => (
+          <React.Fragment key={scrollTop + index}>
+            <Text>{line || ' '}</Text>
+          </React.Fragment>
+        ))}
       </Box>
     </Box>
   );
