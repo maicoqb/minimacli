@@ -7,7 +7,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import { getConnection } from '../lib/connection';
-import { parseMessageEvent } from '../lib/events';
+import { parseEvent } from '../lib/events';
 import { updateMessages, type ChatMessage } from '../lib/messages';
 import { useHarness } from './HarnessContext';
 
@@ -34,10 +34,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     connection.streamEvents(
       sessionId,
       (frame) => {
-        if (frame.type !== 'session/event') {
-          return;
-        }
-        const action = parseMessageEvent(frame.event);
+        const action = parseEvent(frame);
         if (!action) {
           return;
         }

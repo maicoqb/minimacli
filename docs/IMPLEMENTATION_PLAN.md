@@ -36,8 +36,8 @@ Journeys:
   - [x] 3.4 Error: turn fails → TUI remains usable.
   - [x] 3.5 Error: connection drops during the turn → TUI remains usable.
 - [ ] **4. AI approval** — the AI asks permission to execute.
-  - [] 4.1 Display the approval to the user.
-  - [ ] 4.2 Show what will be done (command/action).
+  - [x] 4.1 Display the approval to the user.
+  - [x] 4.2 Show what will be done (command/action).
   - [ ] 4.3 Choose the option: allow, deny, abort — Y, N, Ctrl+C.
   - [ ] 4.4 Error: approval expires → clear message.
   - [ ] 4.5 Error: responding fails → clear message; can try again.
@@ -108,5 +108,6 @@ yet:
 - **Tips on greetings** — show tips about how to use on greetings
 - **Recover a lost mid-turn turn** — settle interrupted turn state after reconnect.
 - **Cap rendered message history** — avoid unbounded history that hurts memory/performance.
+- **Strip markdown in message text** — approval `reason` can carry `**` formatting.
 
 

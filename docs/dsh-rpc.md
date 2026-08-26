@@ -71,7 +71,8 @@ into `messages` by `updateMessages`
 The host can pause a turn to ask the human something. Two answerable frames
 arrive on the mux stream. Each is a server-request with a **stable `rpcId`** the
 client echoes in its answer; answered on `POST /api/respond` (not a unary
-method).
+method). Both arrive atomically — a single complete frame, unlike the streamed
+assistant text.
 
 ```jsonc
 {
