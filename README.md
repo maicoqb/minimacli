@@ -36,7 +36,7 @@ in [ARCHITECTURE.md](ARCHITECTURE.md).
 ## Roadmap
 
 The feature roadmap is tracked in
-[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), a phase-based plan.
+[docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md), a phase-based plan.
 
 ## Status
 

@@ -60,11 +60,17 @@ into `messages` by `updateMessages`
 |---|---|---|
 | `assistant/chunk` | `assistant-delta` | append text to last assistant msg |
 | `assistant/message` | `assistant-complete` | end turn, `isTurnActive = false` |
+| `tool/call` | `tool-call` | append a tool-call message; dedupe by `callId` |
 
 - `assistant/chunk`: only `data.chunk.type === 'text-delta'` produces a delta;
   `block-start`, `block-end`, `usage`, `finish` are ignored.
 - `assistant/message`: joins the text blocks of `data.message.content` into the
   final text.
+- `tool/call`: the model requested one tool invocation. On the wire the
+  `arguments` arrive as the **raw JSON string** exactly as the model produced
+  it (unparsed); the client parses it into an object (falls back to the string
+  when it is not valid JSON). Subsequent events with the same `callId` are
+  ignored (`appendToolCallMessage`).
 
 ## Interactive flows: question and approval
 
