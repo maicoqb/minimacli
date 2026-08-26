@@ -33,8 +33,8 @@ Journeys:
   - [x] 3.1 Receive the turn's response.
   - [x] 3.2 Display the AI message (author + content).
   - [x] 3.3 Cancel the in-progress action with Ctrl+C.
-  - [ ] 3.4 Error: turn fails → clear message; TUI remains usable.
-  - [ ] 3.5 Error: connection drops during the turn → clear message; TUI remains usable.
+  - [x] 3.4 Error: turn fails → TUI remains usable.
+  - [ ] 3.5 Error: connection drops during the turn → TUI remains usable.
 - [ ] **4. AI approval** — the AI asks permission to execute.
   - [ ] 4.1 Display the approval to the user.
   - [ ] 4.2 Show what will be done (command/action).
@@ -91,20 +91,21 @@ yet:
 - **Message queue** — queue prompts while a turn is running.
 - **Force send message** — send even while a turn is in progress or blocked.
 - **Attach files (`@`)** — type `@` in the input to pick and attach files to the prompt.
-- **Run shell command** — typ `!` to send a command in the input.
+- **Run shell command** — type `!` to send a command in the input.
 - **Shortcuts overlay (`Ctrl+?`)** — list the available keybindings and commands.
 - **Change model / workspace** — in-TUI commands to switch the model and the workspace.
 - **Multiple workspaces** — support running more than one workspace at the same time.
 - **Theme** — customizable colors and appearance for the TUI.
 - **Rename session** — rename the current session.
-- **Extract multiline editor to a package** — our input editor model (`apps/minimacli/src/lib/text.ts`) is a candidate to publish to te comunity;
+- **Extract multiline editor to a package** — our input editor model (`apps/minimacli/src/lib/text.ts`) is a candidate to publish to the community.
 - **Read-only sessions** — sessions should start in read-only mode.
 - **Thinking off** — sessions should start with thinking disabled.
 - **Change session policy/sandbox** — change the sandbox/policy of a session.
 - **Change session thinking** — change the thinking setting of a session.
 - **Voice mode** — speak to the TUI.
-- **Goals** - set session goals.
+- **Goals** — set session goals.
 - **Usage / time** — show a line per assistant message.
 - **Tips on greetings** — show tips about how to use on greetings
+- **Recover a lost mid-turn turn** — settle interrupted turn state after reconnect.
 
 

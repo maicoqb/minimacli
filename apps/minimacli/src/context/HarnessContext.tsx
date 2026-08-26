@@ -86,10 +86,11 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
   }, [status, sessionId, ensureSession]);
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!sessionId || status !== 'up') {
       return;
     }
     const controller = new AbortController();
+    let closedByAbortSignal = false;
     harness.streamEvents(
       sessionId,
       (frame) => {
@@ -107,12 +108,20 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
             break;
         }
       },
-      controller.signal
+      controller.signal,
+      () => {
+        if (closedByAbortSignal) {
+          return;
+        }
+        setIsTurnActive(false);
+        setStatus('down');
+      }
     );
     return () => {
+      closedByAbortSignal = true;
       controller.abort();
     };
-  }, [harness, sessionId]);
+  }, [harness, sessionId, status]);
 
   const prompt = useCallback(
     async (text: string) => {

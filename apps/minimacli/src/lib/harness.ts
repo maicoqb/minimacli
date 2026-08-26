@@ -40,7 +40,8 @@ export function streamEvents(
   url: string,
   sessionId: string,
   onFrame: (frame: MuxFrame) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onClose?: () => void
 ): void {
   const socket = new WebSocket(toWsUrl(url, '/api/events.mux'));
   socket.onmessage = (event) => {
@@ -54,6 +55,7 @@ export function streamEvents(
       onFrame(frame);
     }
   };
+  socket.onclose = () => onClose?.();
   signal?.addEventListener('abort', () => socket.close());
 }
 
@@ -83,8 +85,12 @@ export function createHarness(url: string) {
     createSession: (cwd?: string) => createSession(url, cwd),
     prompt: (sessionId: string, text: string) => prompt(url, sessionId, text),
     cancel: (sessionId: string) => cancel(url, sessionId),
-    streamEvents: (sessionId: string, onFrame: (frame: MuxFrame) => void, signal?: AbortSignal) =>
-      streamEvents(url, sessionId, onFrame, signal),
+    streamEvents: (
+      sessionId: string,
+      onFrame: (frame: MuxFrame) => void,
+      signal?: AbortSignal,
+      onClose?: () => void
+    ) => streamEvents(url, sessionId, onFrame, signal, onClose),
   };
 }
 

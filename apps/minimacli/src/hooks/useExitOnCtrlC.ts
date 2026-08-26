@@ -9,10 +9,12 @@ export function useExitOnCtrlC() {
   const { exit } = useApp();
   const onInput = useInput();
   const [exitPending, setExitPending] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
 
   useInkInput((input, key) => {
     if (keyToken(input, key) !== 'ctrl+c') {
       setExitPending(false);
+      setCancelled(false);
     }
   });
 
@@ -20,7 +22,8 @@ export function useExitOnCtrlC() {
     if (action.type !== 'cancel') {
       return;
     }
-    if (isTurnActive) {
+    if (isTurnActive && !cancelled) {
+      setCancelled(true);
       cancel().catch(() => undefined);
       return;
     }

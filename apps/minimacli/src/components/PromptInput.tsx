@@ -49,13 +49,13 @@ export default function PromptInput() {
       flexDirection="column"
     >
       <TextArea value={value} onChange={setValue} disabled={!ready} />
-      {isTurnActive ? (
-        <Box paddingLeft={1}>
-          <Text color="yellow">waiting{dots}</Text>
-        </Box>
-      ) : exitPending ? (
+      {exitPending ? (
         <Box paddingLeft={1}>
           <Text color="yellow">press Ctrl+C again to exit</Text>
+        </Box>
+      ) : isTurnActive ? (
+        <Box paddingLeft={1}>
+          <Text color="yellow">waiting{dots}</Text>
         </Box>
       ) : error ? (
         <Box paddingLeft={1}>
