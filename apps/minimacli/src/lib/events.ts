@@ -1,6 +1,17 @@
 import type { MuxFrame } from './harness';
 import type { MessageEvent } from './messages';
 
+type TextChunk = { type?: string; text?: string };
+type ContentBlock = { type?: string; text?: string };
+type ToolCallData = { callId?: unknown; name?: unknown; arguments?: unknown };
+
+type AssistantChunkEvent = { type: 'assistant/chunk'; data: { chunk?: TextChunk } };
+type AssistantMessageEvent = {
+  type: 'assistant/message';
+  data: { message?: { content?: ContentBlock[] } };
+};
+type ToolCallEvent = { type: 'tool/call'; data: ToolCallData };
+
 function parseApproval(frame: MuxFrame): MessageEvent | null {
   const { approvalId, toolName, reason } = frame as {
     approvalId?: unknown;
@@ -25,7 +36,7 @@ function parseStreamEvent(event: unknown): MessageEvent | null {
   const { type } = event as { type?: string };
 
   if (type === 'assistant/chunk') {
-    const chunk = (event as { data?: { chunk?: { type?: string; text?: string } } }).data?.chunk;
+    const chunk = (event as AssistantChunkEvent).data?.chunk;
     if (chunk?.type === 'text-delta' && typeof chunk.text === 'string') {
       return { kind: 'assistant-delta', text: chunk.text };
     }
@@ -33,8 +44,7 @@ function parseStreamEvent(event: unknown): MessageEvent | null {
   }
 
   if (type === 'assistant/message') {
-    const content = (event as { data?: { message?: { content?: Array<{ type?: string; text?: string }> } } })
-      .data?.message?.content;
+    const content = (event as AssistantMessageEvent).data?.message?.content;
     const text = content
       ? content
           .filter((block) => block.type === 'text' && typeof block.text === 'string')
@@ -42,6 +52,21 @@ function parseStreamEvent(event: unknown): MessageEvent | null {
           .join('')
       : '';
     return { kind: 'assistant-complete', text };
+  }
+
+  if (type === 'tool/call') {
+    const { callId, name, arguments: raw } = (event as ToolCallEvent).data ?? {};
+    if (typeof callId !== 'string' || typeof name !== 'string' || typeof raw !== 'string') {
+      return null;
+    }
+    const parsed = (() => {
+      try {
+        return JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        return raw;
+      }
+    })();
+    return { kind: 'tool-call', callId, name, arguments: parsed };
   }
 
   return null;

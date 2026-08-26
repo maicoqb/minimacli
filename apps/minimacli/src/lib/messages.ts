@@ -7,6 +7,17 @@ export type ChatTextMessage = {
   streaming: boolean;
 };
 
+export type ToolArguments = Record<string, unknown> | string;
+
+export type ChatToolCallMessage = {
+  role: 'assistant';
+  kind: 'tool-call';
+  callId: string;
+  name: string;
+  arguments: ToolArguments;
+  streaming: boolean;
+};
+
 export type ChatApprovalMessage = {
   role: 'assistant';
   kind: 'approval';
@@ -17,11 +28,12 @@ export type ChatApprovalMessage = {
   streaming: boolean;
 };
 
-export type ChatMessage = ChatTextMessage | ChatApprovalMessage;
+export type ChatMessage = ChatTextMessage | ChatApprovalMessage | ChatToolCallMessage;
 
 export type MessageEvent =
   | { kind: 'assistant-delta'; text: string }
   | { kind: 'assistant-complete'; text: string }
+  | { kind: 'tool-call'; callId: string; name: string; arguments: ToolArguments }
   | { kind: 'approval-requested'; approvalId: string; toolName: string; reason?: string };
 
 function appendTextMessage(
@@ -30,6 +42,26 @@ function appendTextMessage(
   streaming: boolean
 ): ChatMessage[] {
   return [...messages, { role: 'assistant', kind: 'text', text, streaming }];
+}
+
+function appendToolCallMessage(
+  messages: ChatMessage[],
+  event: { callId: string; name: string; arguments: ToolArguments }
+): ChatMessage[] {
+  if (messages.some((message) => message.kind === 'tool-call' && message.callId === event.callId)) {
+    return messages;
+  }
+  return [
+    ...messages,
+    {
+      role: 'assistant',
+      kind: 'tool-call',
+      callId: event.callId,
+      name: event.name,
+      arguments: event.arguments,
+      streaming: false,
+    },
+  ];
 }
 
 function appendApprovalMessage(
@@ -93,6 +125,8 @@ export function updateMessages(
       return applyDelta(messages, event);
     case 'assistant-complete':
       return applyComplete(messages, event);
+    case 'tool-call':
+      return appendToolCallMessage(messages, event);
     case 'approval-requested':
       return appendApprovalMessage(messages, event);
     default:
