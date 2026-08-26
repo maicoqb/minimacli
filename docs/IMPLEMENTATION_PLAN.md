@@ -110,5 +110,6 @@ yet:
 - **Cap rendered message history** — avoid unbounded history that hurts memory/performance.
 - **Strip markdown in message text** — approval `reason` can carry `**` formatting.
 - **Always show last user message** — pin the latest user message on screen.
+- **Tool output parsers** — friendly display for tool outputs.
 
 
