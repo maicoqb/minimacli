@@ -1,15 +1,19 @@
 import React from 'react';
 import { Box, Text, useWindowSize } from 'ink';
-import Greeting from './Greeting';
+import Conversation from './Conversation';
 import PromptInput from './PromptInput';
 import HarnessStatus from './HarnessStatus';
 
 const SCREEN_PADDING = 1;
+const SEPARATOR_HEIGHT = 1;
+const STATUS_HEIGHT = 1;
 
 export default function Screen() {
   const { columns, rows } = useWindowSize();
 
   const inputHeight = Math.max(4, Math.ceil(rows * 0.2));
+  const outputHeight =
+    rows - inputHeight - SEPARATOR_HEIGHT - STATUS_HEIGHT - 2 * SCREEN_PADDING;
   const separatorWidth = Math.max(0, columns - 2 * SCREEN_PADDING);
 
   return (
@@ -19,8 +23,13 @@ export default function Screen() {
       flexDirection="column"
       padding={SCREEN_PADDING}
     >
-      <Box flexGrow={1} alignItems="center" justifyContent="center">
-        <Greeting />
+      <Box
+        flexGrow={1}
+        alignItems="center"
+        justifyContent="center"
+        height={outputHeight}
+      >
+        <Conversation />
       </Box>
 
       <Text>{"─".repeat(separatorWidth)}</Text>

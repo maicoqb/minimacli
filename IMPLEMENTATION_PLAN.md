@@ -31,7 +31,7 @@ Journeys:
   - [x] 2.4 Error: send fails → can try again.
 - [ ] **3. See the AI response** — response rendered.
   - [x] 3.1 Receive the turn's response.
-  - [ ] 3.2 Display the AI message (author + content).
+  - [x] 3.2 Display the AI message (author + content).
   - [ ] 3.3 Cancel the in-progress action with Ctrl+C.
   - [ ] 3.4 Error: turn fails → clear message; TUI remains usable.
   - [ ] 3.5 Error: connection drops during the turn → clear message; TUI remains usable.
@@ -102,3 +102,9 @@ yet:
 - **Thinking off** — sessions should start with thinking disabled.
 - **Change session policy/sandbox** — change the sandbox/policy of a session.
 - **Change session thinking** — change the thinking setting of a session.
+- **Voice mode** — speak to the TUI.
+- **Goals** - set session goals.
+- **Usage / time** — show a line per assistant message.
+- **Tips on greetings** — show tips about how to use on greetings
+
+

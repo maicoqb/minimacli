@@ -8,7 +8,9 @@ import React, {
   type ReactNode,
 } from 'react';
 import { createHarness, type HarnessDescriptor, type HarnessStatus } from '../lib/harness';
-import { startEventLogging } from '../lib/eventLog';
+import { parseMessageEvent, type ParseMessageEventResult } from '../lib/events';
+
+export type ChatMessage = { role: 'user' | 'assistant'; text: string };
 
 type HarnessContextValue = {
   status: HarnessStatus;
@@ -17,7 +19,29 @@ type HarnessContextValue = {
   url: string;
   retry: () => void;
   prompt: (text: string) => Promise<void>;
+  messages: ChatMessage[];
 };
+
+type DeltaAction = Extract<ParseMessageEventResult, { kind: 'assistant-delta' }>;
+type CompleteAction = Extract<ParseMessageEventResult, { kind: 'assistant-complete' }>;
+
+function mutateAssistantMessage(
+  action: DeltaAction | CompleteAction
+): (current: ChatMessage[]) => ChatMessage[] {
+  return (current) => {
+    const last = current[current.length - 1];
+    if (last?.role !== 'assistant') {
+      return [...current, { role: 'assistant', text: action.text }];
+    }
+
+    const text =
+      action.kind === 'assistant-delta' ? last.text + action.text : action.text;
+    const updated = { ...last, text };
+    const copy = current.slice();
+    copy[copy.length - 1] = updated;
+    return copy;
+  };
+}
 
 const HarnessContext = createContext<HarnessContextValue | null>(null);
 
@@ -26,6 +50,7 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
   const [status, setStatus] = useState<HarnessStatus>('checking');
   const [descriptor, setDescriptor] = useState<HarnessDescriptor | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const retry = useCallback(async () => {
     setStatus('checking');
@@ -64,7 +89,18 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
     const controller = new AbortController();
     harness.streamEvents(
       sessionId,
-      (frame) => console.error('Received frame:', frame),
+      (frame) => {
+        if (frame.type !== 'session/event') {
+          return;
+        }
+        const action = parseMessageEvent(frame.event);
+        switch (action?.kind) {
+          case 'assistant-delta':
+          case 'assistant-complete':
+            setMessages(mutateAssistantMessage(action));
+            break;
+        }
+      },
       controller.signal
     );
     return () => {
@@ -77,6 +113,7 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       if (!sessionId) {
         throw new Error('no session');
       }
+      setMessages((current) => [...current, { role: 'user', text }]);
       await harness.prompt(sessionId, text);
     },
     [harness, sessionId]
@@ -90,8 +127,9 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       url,
       retry,
       prompt,
+      messages,
     }),
-    [status, descriptor, url, retry, prompt]
+    [status, descriptor, url, retry, prompt, messages]
   );
 
   return <HarnessContext.Provider value={value}>{children}</HarnessContext.Provider>;
