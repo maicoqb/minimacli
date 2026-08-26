@@ -33,6 +33,11 @@ HTTP/WebSocket API and never boot their own harness profile.
 The full architecture — lifecycle, watcher, ledger and open questions — lives
 in [ARCHITECTURE.md](ARCHITECTURE.md).
 
+## Roadmap
+
+The feature roadmap is tracked in
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), a phase-based plan.
+
 ## Status
 
 Work in progress. Nothing is implemented yet.

@@ -83,5 +83,19 @@ closes → web dies (prune + kill); watcher exits if the web dies.
 Done criteria: tests covering what was built; docs updated;
 packaging (e.g., installable global binary); i18n.
 
-- force send message
-- message queue
+## Others
+
+Ideas and nice-to-haves tracked in `.docs/NOTES.md`, not committed to a phase
+yet:
+
+- **Message queue** — queue prompts while a turn is running.
+- **Force send message** — send even while a turn is in progress or blocked.
+- **Attach files (`@`)** — type `@` in the input to pick and attach files to the prompt.
+- **Run shell command** — typ `!` to send a command in the input.
+- **Shortcuts overlay (`Ctrl+?`)** — list the available keybindings and commands.
+- **Change model / workspace** — in-TUI commands to switch the model and the workspace.
+- **Multiple workspaces** — support running more than one workspace at the same time.
+- **Theme** — customizable colors and appearance for the TUI.
+- **Rename session** — rename the current session.
+- **Extract multiline editor to a package** — our input editor model (`apps/minimacli/src/lib/text.ts`) is a candidate to publish to te comunity;
+
