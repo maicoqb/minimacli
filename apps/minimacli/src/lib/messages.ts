@@ -1,3 +1,11 @@
+import type {
+  AssistantComplete,
+  AssistantDelta,
+  ApprovalRequest,
+  SessionEvent,
+  ToolCall,
+} from './harness';
+
 export type ChatMessageRole = 'user' | 'assistant';
 
 export type ChatTextMessage = {
@@ -12,7 +20,6 @@ export type ToolArguments = Record<string, unknown> | string;
 export type ChatToolCallMessage = {
   role: 'assistant';
   kind: 'tool-call';
-  callId: string;
   name: string;
   arguments: ToolArguments;
   streaming: boolean;
@@ -21,20 +28,11 @@ export type ChatToolCallMessage = {
 export type ChatApprovalMessage = {
   role: 'assistant';
   kind: 'approval';
-  approvalId: string;
-  toolName: string;
   reason?: string;
-  text: string;
   streaming: boolean;
 };
 
 export type ChatMessage = ChatTextMessage | ChatApprovalMessage | ChatToolCallMessage;
-
-export type MessageEvent =
-  | { kind: 'assistant-delta'; text: string }
-  | { kind: 'assistant-complete'; text: string }
-  | { kind: 'tool-call'; callId: string; name: string; arguments: ToolArguments }
-  | { kind: 'approval-requested'; approvalId: string; toolName: string; reason?: string };
 
 function appendTextMessage(
   messages: ChatMessage[],
@@ -46,17 +44,13 @@ function appendTextMessage(
 
 function appendToolCallMessage(
   messages: ChatMessage[],
-  event: { callId: string; name: string; arguments: ToolArguments }
+  event: ToolCall
 ): ChatMessage[] {
-  if (messages.some((message) => message.kind === 'tool-call' && message.callId === event.callId)) {
-    return messages;
-  }
   return [
     ...messages,
     {
       role: 'assistant',
       kind: 'tool-call',
-      callId: event.callId,
       name: event.name,
       arguments: event.arguments,
       streaming: false,
@@ -66,21 +60,14 @@ function appendToolCallMessage(
 
 function appendApprovalMessage(
   messages: ChatMessage[],
-  event: Extract<MessageEvent, { kind: 'approval-requested' }>
+  event: ApprovalRequest
 ): ChatMessage[] {
-  const last = messages[messages.length - 1];
-  if (last?.kind === 'approval' && last.approvalId === event.approvalId) {
-    return messages;
-  }
   return [
     ...messages,
     {
       role: 'assistant',
       kind: 'approval',
-      approvalId: event.approvalId,
-      toolName: event.toolName,
       reason: event.reason,
-      text: event.reason ?? event.toolName,
       streaming: false,
     },
   ];
@@ -88,7 +75,7 @@ function appendApprovalMessage(
 
 function applyDelta(
   messages: ChatMessage[],
-  event: Extract<MessageEvent, { kind: 'assistant-delta' }>
+  event: AssistantDelta
 ): ChatMessage[] {
   const last = messages[messages.length - 1];
   if (last?.role === 'assistant' && last.kind === 'text' && last.streaming) {
@@ -101,7 +88,7 @@ function applyDelta(
 
 function applyComplete(
   messages: ChatMessage[],
-  event: Extract<MessageEvent, { kind: 'assistant-complete' }>
+  event: AssistantComplete
 ): ChatMessage[] {
   const last = messages[messages.length - 1];
   if (last?.role !== 'assistant') {
@@ -118,7 +105,7 @@ function applyComplete(
 
 export function updateMessages(
   messages: ChatMessage[],
-  event: MessageEvent
+  event: SessionEvent
 ): ChatMessage[] {
   switch (event.kind) {
     case 'assistant-delta':

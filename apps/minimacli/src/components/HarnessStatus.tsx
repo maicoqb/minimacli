@@ -3,9 +3,11 @@ import { Box, Text } from 'ink';
 import { formatWorkspace } from '../lib/path';
 import { useInput } from '../hooks/useInput';
 import { useHarness } from '../context/HarnessContext';
+import { useSession } from '../context/SessionContext';
 
 export default function HarnessStatus() {
   const { status, descriptor, url, retry } = useHarness();
+  const { workspace } = useSession();
   const onInput = useInput({ isActive: status === 'down' });
 
   onInput((action) => {
@@ -23,7 +25,7 @@ export default function HarnessStatus() {
   return (
     <Box width="100%" flexDirection="row" justifyContent="space-between">
       <Text color="green">● {descriptor?.provider}</Text>
-      <Text color="green">{descriptor ? formatWorkspace(descriptor.cwd, descriptor.home) : ''}</Text>
+      <Text color="green">{formatWorkspace(workspace)}</Text>
     </Box>
   );
 }

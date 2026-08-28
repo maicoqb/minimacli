@@ -1,97 +1,60 @@
+import { createHarnessDsh } from './dsh/harness';
+
 export const DEFAULT_HARNESS_URL = 'http://127.0.0.1:3080';
 
 export type HarnessStatus = 'checking' | 'up' | 'down';
 
 export type HarnessDescriptor = {
   version: string;
-  cwd: string;
   provider: string;
-  model: string;
-  attachedSessions: number;
-  home: string;
-  canOpenPath: boolean;
 };
+
+export type ToolArguments = Record<string, unknown> | string;
 
 export type SessionCreated = {
   sessionId: string;
-  agentPreset?: string;
 };
 
 export type PromptAccepted = {
   accepted: true;
-  command?: { kind: 'success'; text?: string };
 };
 
-type ServerResponse<T> =
-  | { type: 'server-response'; rpcId: string; result: { ok: true; value: T } }
-  | { type: 'server-response'; rpcId: string; result: { ok: false; error: unknown } };
+export type AssistantDelta = {
+  kind: 'assistant-delta';
+  text: string;
+};
 
-export type Harness = ReturnType<typeof createHarness>;
+export type AssistantComplete = {
+  kind: 'assistant-complete';
+  text: string;
+};
 
-export type MuxFrame = { type: string; sessionId?: string } & Record<string, unknown>;
+export type ToolCall = {
+  kind: 'tool-call';
+  name: string;
+  arguments: ToolArguments;
+};
 
-function toWsUrl(httpUrl: string, path: string): string {
-  const url = new URL(path, httpUrl);
-  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-  return url.toString();
-}
+export type ApprovalRequest = {
+  kind: 'approval-requested';
+  reason: string;
+};
 
-export function streamEvents(
-  url: string,
-  sessionId: string,
-  onFrame: (frame: MuxFrame) => void,
-  signal?: AbortSignal,
-  onClose?: () => void
-): void {
-  const socket = new WebSocket(toWsUrl(url, '/api/events.mux'));
-  socket.onmessage = (event) => {
-    const data = event.data;
-    if (typeof data !== 'string') {
-      return;
-    }
-    const envelope = JSON.parse(data) as { payload?: unknown };
-    const frame = envelope.payload as MuxFrame | undefined;
-    if (frame && frame.sessionId === sessionId) {
-      onFrame(frame);
-    }
-  };
-  socket.onclose = () => onClose?.();
-  signal?.addEventListener('abort', () => socket.close());
-}
+export type SessionEvent = AssistantDelta | AssistantComplete | ToolCall | ApprovalRequest;
 
-export function describe(url: string): Promise<HarnessDescriptor> {
-  return callRpc<HarnessDescriptor>(url, 'host.describe', {});
-}
-
-export function createSession(url: string, cwd?: string): Promise<SessionCreated> {
-  return callRpc<SessionCreated>(url, 'session.create', cwd ? { cwd } : {});
-}
-
-export function prompt(url: string, sessionId: string, text: string): Promise<PromptAccepted> {
-  return callRpc<PromptAccepted>(url, 'session.prompt', {
-    sessionId,
-    mode: 'queue',
-    content: [{ type: 'text', text }],
-  });
-}
-
-export function cancel(url: string, sessionId: string): Promise<{ accepted: true }> {
-  return callRpc<{ accepted: true }>(url, 'session.cancel', { sessionId });
-}
-
-export function createHarness(url: string) {
-  return {
-    describe: () => describe(url),
-    createSession: (cwd?: string) => createSession(url, cwd),
-    prompt: (sessionId: string, text: string) => prompt(url, sessionId, text),
-    cancel: (sessionId: string) => cancel(url, sessionId),
-    streamEvents: (
-      sessionId: string,
-      onFrame: (frame: MuxFrame) => void,
-      signal?: AbortSignal,
-      onClose?: () => void
-    ) => streamEvents(url, sessionId, onFrame, signal, onClose),
-  };
+export interface Harness {
+  readonly sessionId: string;
+  describe(): Promise<HarnessDescriptor>;
+  createSession(cwd?: string): Promise<SessionCreated>;
+  prompt(sessionId: string, text: string): Promise<PromptAccepted>;
+  cancel(sessionId: string): Promise<void>;
+  streamEvents(
+    sessionId: string,
+    onEvent: (event: SessionEvent) => void,
+    signal?: AbortSignal,
+    onClose?: () => void
+  ): void;
+  respondApproval(request: ApprovalRequest, decision: 'allow' | 'deny'): Promise<void>;
 }
 
 const harnessCache = new Map<string, Harness>();
@@ -99,34 +62,8 @@ const harnessCache = new Map<string, Harness>();
 export function getHarness(url: string): Harness {
   let harness = harnessCache.get(url);
   if (!harness) {
-    harness = createHarness(url);
+    harness = createHarnessDsh({ url });
     harnessCache.set(url, harness);
   }
   return harness;
-}
-
-async function callRpc<T>(url: string, method: string, payload: unknown): Promise<T> {
-  const message = {
-    type: 'client-request',
-    rpcId: crypto.randomUUID(),
-    method,
-    payload,
-  };
-  
-  const response = await fetch(`${url}/api/${method}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(message),
-  });
-
-  if (!response.ok) {
-    throw new Error(`${method} failed: HTTP ${response.status}`);
-  }
-
-  const body = (await response.json()) as ServerResponse<T>;
-  if (!body.result.ok) {
-    throw new Error(`${method} returned an error result`);
-  }
-
-  return body.result.value;
 }

@@ -7,7 +7,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { createHarness, type HarnessDescriptor, type HarnessStatus } from '../lib/harness';
+import { getHarness, type HarnessDescriptor, type HarnessStatus } from '../lib/harness';
 
 export type { ChatMessage } from '../lib/messages';
 
@@ -22,7 +22,7 @@ type HarnessContextValue = {
 const HarnessContext = createContext<HarnessContextValue | null>(null);
 
 export function HarnessProvider({ url, children }: { url: string; children: ReactNode }) {
-  const harness = useMemo(() => createHarness(url), [url]);
+  const harness = useMemo(() => getHarness(url), [url]);
   const [status, setStatus] = useState<HarnessStatus>('checking');
   const [descriptor, setDescriptor] = useState<HarnessDescriptor | null>(null);
 

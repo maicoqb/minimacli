@@ -1,4 +1,7 @@
-export function formatWorkspace(cwd: string, home: string): string {
+import { homedir } from 'node:os';
+
+export function formatWorkspace(cwd: string): string {
+  const home = homedir()
   const norm = (p: string) => p.replace(/\\/g, '/').replace(/\/+$/, '');
   const c = norm(cwd);
   const h = norm(home);

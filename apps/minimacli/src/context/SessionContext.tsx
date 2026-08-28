@@ -3,16 +3,17 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react';
-import { getConnection } from '../lib/connection';
-import { parseEvent } from '../lib/events';
+import { getHarness, type SessionEvent } from '../lib/harness';
 import { updateMessages, type ChatMessage } from '../lib/messages';
 import { useHarness } from './HarnessContext';
 
 type SessionContextValue = {
   isReady: boolean;
+  workspace: string;
   prompt: (text: string) => Promise<void>;
   interrupt: () => Promise<void>;
   isTurnActive: boolean;
@@ -23,23 +24,21 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const { url, status } = useHarness();
-  const connection = getConnection(url);
+  const harness = useMemo(() => getHarness(url), [url]);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [workspace, setWorkspace] = useState(process.cwd());
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTurnActive, setIsTurnActive] = useState(false);
 
   const isReady = status === 'up' && sessionId !== null;
 
   function streamEvents(sessionId: string, controller: AbortController) {
-    connection.streamEvents(
+    harness.streamEvents(
       sessionId,
-      (frame) => {
-        const action = parseEvent(frame);
-        if (!action) {
-          return;
-        }
+      (event: SessionEvent) => {
+        
         setMessages((current) => {
-          const next = updateMessages(current, action);
+          const next = updateMessages(current, event);
           const last = next[next.length - 1];
           setIsTurnActive(last?.streaming ?? false);
           return next;
@@ -51,8 +50,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   async function connect() {
     try {
-      const session = await connection.createSession(process.cwd());
+      const cwd = process.cwd();
+      const session = await harness.createSession(cwd);
       setSessionId(session.sessionId);
+      setWorkspace(cwd);
     } catch {
       return;
     }
@@ -64,7 +65,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       { role: 'user', text, streaming: false },
     ]);
     setIsTurnActive(true);
-    await connection.prompt(sessionId, text);
+    await harness.prompt(sessionId, text);
   }
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       return;
     }
     connect();
-  }, [connection, status, sessionId]);
+  }, [harness, status, sessionId]);
 
   useEffect(() => {
     if (!sessionId || status !== 'up') {
@@ -81,7 +82,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const controller = new AbortController();
     streamEvents(sessionId, controller);
     return () => controller.abort();
-  }, [connection, sessionId, status]);
+  }, [harness, sessionId, status]);
 
   const prompt = useCallback(
     async (text: string) => {
@@ -97,11 +98,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (!sessionId) {
       return;
     }
-    await connection.cancel(sessionId);
-  }, [connection, sessionId]);
+    await harness.cancel(sessionId);
+  }, [harness, sessionId]);
 
   const value: SessionContextValue = {
     isReady,
+workspace,
     prompt,
     interrupt,
     isTurnActive,
