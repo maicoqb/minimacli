@@ -7,7 +7,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { getHarness, type SessionEvent } from '../lib/harness';
+import { getHarness, type ApprovalRequest, type SessionEvent } from '../lib/harness';
 import { updateMessages, type ChatMessage } from '../lib/messages';
 import { useHarness } from './HarnessContext';
 
@@ -17,6 +17,8 @@ type SessionContextValue = {
   prompt: (text: string) => Promise<void>;
   interrupt: () => Promise<void>;
   isTurnActive: boolean;
+  hasPendingApproval: boolean;
+  respondApproval: (kind: 'allow' | 'deny') => Promise<void>;
   messages: ChatMessage[];
 };
 
@@ -29,14 +31,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [workspace, setWorkspace] = useState(process.cwd());
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTurnActive, setIsTurnActive] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState<ApprovalRequest | null>(null);
 
   const isReady = status === 'up' && sessionId !== null;
+  const hasPendingApproval = pendingApproval !== null;
 
   function streamEvents(sessionId: string, controller: AbortController) {
     harness.streamEvents(
       sessionId,
       (event: SessionEvent) => {
-        
+        if (event.kind === 'approval-requested') {
+          setPendingApproval(event);
+        }
         setMessages((current) => {
           const next = updateMessages(current, event);
           const last = next[next.length - 1];
@@ -101,12 +107,25 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await harness.cancel(sessionId);
   }, [harness, sessionId]);
 
+  const respondApproval = useCallback(
+    async (kind: 'allow' | 'deny') => {
+      if (!pendingApproval) {
+        throw new Error('no pending approval');
+      }
+      setPendingApproval(null);
+      await harness.respondApproval(pendingApproval, kind);
+    },
+    [harness, pendingApproval]
+  );
+
   const value: SessionContextValue = {
     isReady,
-workspace,
+    workspace,
     prompt,
     interrupt,
     isTurnActive,
+    hasPendingApproval,
+    respondApproval,
     messages,
   };
 

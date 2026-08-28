@@ -4,6 +4,7 @@ import Conversation from './Conversation';
 import PromptInput from './PromptInput';
 import HarnessStatus from './HarnessStatus';
 import Hr from './Hr';
+import ApprovalPanel from './ApprovalPanel';
 
 const SCREEN_PADDING = 1;
 const SEPARATOR_HEIGHT = 1;
@@ -47,6 +48,11 @@ export default function Screen() {
       >
         <PromptInput />
       </Box>
+
+      <ApprovalPanel
+        bottom={SCREEN_PADDING + inputHeight + STATUS_HEIGHT + SEPARATOR_HEIGHT}
+        left={SCREEN_PADDING + 3}
+      />
     </Box>
   );
 }

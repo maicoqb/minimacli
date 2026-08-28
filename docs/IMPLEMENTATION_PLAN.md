@@ -35,16 +35,19 @@ Journeys:
   - [x] 3.3 Cancel the in-progress action with Ctrl+C.
   - [x] 3.4 Error: turn fails → TUI remains usable.
   - [x] 3.5 Error: connection drops during the turn → TUI remains usable.
-- [ ] **4. AI approval** — the AI asks permission to execute.
+- [x] **4. AI approval** — the AI asks permission to execute.
   - [x] 4.1 Display the approval to the user.
   - [x] 4.2 Show what will be done (command/action).
-  - [ ] 4.3 Choose the option: allow, deny, abort — Y, N, Ctrl+C.
-  - [ ] 4.4 Error: approval expires → clear message.
-  - [ ] 4.5 Error: responding fails → clear message; can try again.
-  - [ ] 4.6 Error: pending already resolved → clear message.
-- [ ] **5. Single session** — the conversation belongs to a session.
-  - [ ] 5.1 Opening the CLI starts a session.
-  - [ ] 5.2 Opening the CLI in the same directory opens the last session.
+  - [x] 4.3 Choose the option: allow or deny.
+  - [x] 4.4 Error: responding fails → can try again.
+- [ ] **5. AI questions** — the AI asks the user to answer questions.
+  - [ ] 5.1 Display a question with its options.
+  - [ ] 5.2 Support single selection.
+  - [ ] 5.3 Support free-text answers.
+  - [ ] 5.6 Error: responding fails → can try again.
+- [ ] **6. Single session** — the conversation belongs to a session.
+  - [ ] 6.1 Opening the CLI starts a session.
+  - [ ] 6.2 Opening the CLI in the same directory opens the last session.
 
 ### Phase 2 — Full TUI
 
@@ -72,6 +75,9 @@ Journeys:
   - [ ] 4.2 Ctrl+↑/↓: navigate between conversation messages.
   - [ ] 4.3 PgUp/PgDn: scroll the conversation by page.
   - [ ] 4.4 Ctrl+PgUp/PgDn: switch between sessions.
+- [ ] **5. AI questions** — question details.
+  - [ ] 5.1 Multiple selection.
+  - [ ] 5.2 Skip question.
 
 ### Phase 3 — Watcher
 

@@ -8,7 +8,9 @@ export type CommandAction =
   | { type: 'scrollPageUp' }
   | { type: 'scrollPageDown' }
   | { type: 'scrollUp' }
-  | { type: 'scrollDown' };
+  | { type: 'scrollDown' }
+  | { type: 'up' }
+  | { type: 'down' };
 
 export const keymap: Record<string, CommandAction | null> = {
   'ctrl+r': { type: 'retry' },
@@ -18,6 +20,8 @@ export const keymap: Record<string, CommandAction | null> = {
   pagedown: { type: 'scrollPageDown' },
   'ctrl+up': { type: 'scrollUp' },
   'ctrl+down': { type: 'scrollDown' },
+  up: { type: 'up' },
+  down: { type: 'down' },
 };
 
 export function resolveKey(input: string, key: Key): CommandAction | null {

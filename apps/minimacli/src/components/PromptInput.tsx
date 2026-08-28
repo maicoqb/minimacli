@@ -10,14 +10,15 @@ const BORDER = 1;
 const PADDING = 1;
 
 export default function PromptInput() {
-  const { isReady, prompt, isTurnActive } = useSession();
+  const { isReady, prompt, isTurnActive, hasPendingApproval } = useSession();
   const onInput = useInput();
   const exitPending = useCtrlCHandler();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const dots = useLoadingDots(isTurnActive);
 
-  const sendBlocked = !isReady || isTurnActive;
+  const isDisabled = !isReady || hasPendingApproval;
+  const sendBlocked = isDisabled || isTurnActive;
 
   async function handleSend(text: string) {
     setError(null);
@@ -48,7 +49,7 @@ export default function PromptInput() {
       paddingRight={PADDING}
       flexDirection="column"
     >
-      <TextArea value={value} onChange={setValue} disabled={!isReady} />
+      <TextArea value={value} onChange={setValue} disabled={isDisabled} />
       {exitPending ? (
         <Box paddingLeft={1}>
           <Text color="yellow">press Ctrl+C again to exit</Text>
