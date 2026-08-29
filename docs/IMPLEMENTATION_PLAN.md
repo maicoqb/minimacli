@@ -46,9 +46,10 @@ Journeys:
   - [x] 5.3 Support free-text answers.
   - [x] 5.4 Support multiple questions at once.
   - [x] 5.5 Error: responding fails → can try again.
-- [ ] **6. Single session** — the conversation belongs to a session.
-  - [ ] 6.1 Opening the CLI starts a session.
-  - [ ] 6.2 Opening the CLI in the same directory opens the last session.
+- [x] **6. Single session** — the conversation belongs to a session.
+  - [x] 6.1 Opening the CLI starts a session.
+  - [x] 6.2 Opening the CLI in the same directory opens the last session.
+  - [x] 6.3 Starting a new session with `--new-session`, ignoring the stored last session.
 
 ### Phase 2 — Full TUI
 
@@ -119,6 +120,8 @@ yet:
 - **Strip markdown in message text** — approval `reason` can carry `**` formatting.
 - **Always show last user message** — pin the latest user message on screen.
 - **Tool output parsers** — friendly display for tool outputs.
-- **Minimize modals**.
+- **Minimize modals** — allow overlays to be collapsed to free up screen space.
+- **Markdown parser** — a markdown parser to render assistant messages in the TUI.
+- **`--new-session` flag** — a CLI input to force starting a fresh session instead of reopening the last one.
 
 

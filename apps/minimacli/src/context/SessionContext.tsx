@@ -16,6 +16,7 @@ import {
   type SessionEvent,
 } from '../lib/harness';
 import { updateMessages, type ChatMessage } from '../lib/messages';
+import { getLastSessionId, touchSession } from '../lib/sessionStore';
 import { useHarness } from './HarnessContext';
 
 export type AnswerableQuestion = QuestionItem & {
@@ -76,7 +77,13 @@ function resolveQuestion(
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
-export function SessionProvider({ children }: { children: ReactNode }) {
+export function SessionProvider({
+  children,
+  forceNewSession = false,
+}: {
+  children: ReactNode;
+  forceNewSession?: boolean;
+}) {
   const { url, status } = useHarness();
   const harness = useMemo(() => getHarness(url), [url]);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -113,8 +120,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   async function connect() {
     try {
       const cwd = process.cwd();
-      const session = await harness.createSession(cwd);
-      setSessionId(session.sessionId);
+      const lastSessionId = forceNewSession ? null : getLastSessionId(cwd);
+      setSessionId(lastSessionId ?? (await harness.createSession(cwd)).sessionId);
       setWorkspace(cwd);
     } catch {
       return;
@@ -136,6 +143,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
     connect();
   }, [harness, status, sessionId]);
+
+  useEffect(() => {
+    if (sessionId && status === 'up') {
+      touchSession(sessionId, process.cwd());
+    }
+  }, [sessionId, status]);
 
   useEffect(() => {
     if (!sessionId || status !== 'up') {
