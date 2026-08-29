@@ -7,7 +7,12 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { getHarness, type ApprovalRequest, type SessionEvent } from '../lib/harness';
+import {
+  getHarness,
+  type ApprovalRequest,
+  type QuestionItem,
+  type SessionEvent,
+} from '../lib/harness';
 import { updateMessages, type ChatMessage } from '../lib/messages';
 import { useHarness } from './HarnessContext';
 
@@ -19,6 +24,7 @@ type SessionContextValue = {
   isTurnActive: boolean;
   hasPendingApproval: boolean;
   respondApproval: (kind: 'allow' | 'deny') => Promise<void>;
+  pendingQuestion: QuestionItem | null;
   messages: ChatMessage[];
 };
 
@@ -32,6 +38,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTurnActive, setIsTurnActive] = useState(false);
   const [pendingApproval, setPendingApproval] = useState<ApprovalRequest | null>(null);
+  const [pendingQuestion, setPendingQuestion] = useState<QuestionItem | null>(null);
 
   const isReady = status === 'up' && sessionId !== null;
   const hasPendingApproval = pendingApproval !== null;
@@ -42,6 +49,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       (event: SessionEvent) => {
         if (event.kind === 'approval-requested') {
           setPendingApproval(event);
+        }
+        if (event.kind === 'question-requested' && event.questions.length > 0) {
+          setPendingQuestion(event.questions[0]);
         }
         setMessages((current) => {
           const next = updateMessages(current, event);
@@ -126,6 +136,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     isTurnActive,
     hasPendingApproval,
     respondApproval,
+    pendingQuestion,
     messages,
   };
 

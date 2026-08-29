@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Text, useInput as useInkInput } from 'ink';
 import { useSession } from '../context/SessionContext';
 import { useInput } from '../hooks/useInput';
+import FloatingPanel from './FloatingPanel';
 
 type ApprovalPanelProps = {
   top?: number | string;
@@ -52,21 +53,7 @@ export default function ApprovalPanel({ top, right, bottom, left }: ApprovalPane
   }
 
   return (
-    <Box
-      position="absolute"
-      top={top}
-      right={right}
-      bottom={bottom}
-      left={left}
-      flexDirection="column"
-      borderStyle="round"
-      borderColor="gray"
-      backgroundColor="blue"
-      paddingLeft={1}
-      paddingRight={1}
-      paddingTop={0}
-      paddingBottom={0}
-    >
+    <FloatingPanel top={top} right={right} bottom={bottom} left={left}>
       <Text color="white" bold>
         Approval required
       </Text>
@@ -83,6 +70,6 @@ export default function ApprovalPanel({ top, right, bottom, left }: ApprovalPane
           );
         })}
       </Box>
-    </Box>
+    </FloatingPanel>
   );
 }

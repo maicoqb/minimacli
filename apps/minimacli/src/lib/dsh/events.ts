@@ -1,6 +1,7 @@
 import type {
   SessionEvent as ISessionEvent,
   ApprovalRequest as IApprovalRequest,
+  QuestionRequest as IQuestionRequest,
   ToolArguments
 } from '../harness';
 
@@ -53,7 +54,28 @@ type ApprovalMuxFrame = BaseMuxFrame & {
   reason?: unknown;
 };
 
-export type MuxFrame = SessionEventMuxFrame | ApprovalMuxFrame;
+type QuestionOption = {
+  label: string;
+  description?: string;
+};
+
+type QuestionItem = {
+  id: string;
+  question: string;
+  header?: string;
+  detail?: string;
+  options?: QuestionOption[];
+  // TODO: enable multi select later
+  // multiSelect?: boolean;
+};
+
+type QuestionMuxFrame = BaseMuxFrame & {
+  type: 'question/requested';
+  sessionId?: unknown;
+  questions?: unknown[];
+};
+
+export type MuxFrame = SessionEventMuxFrame | ApprovalMuxFrame | QuestionMuxFrame;
 
 export type SessionEvent = ISessionEvent & {
   rpcId: string
@@ -63,6 +85,10 @@ export type ApprovalRequest = IApprovalRequest & {
   rpcId: string;
   sessionId: string;
   approvalId: string;
+};
+
+export type QuestionRequest = IQuestionRequest & {
+  rpcId: string;
 };
 
 function parseApproval(frame: ApprovalMuxFrame, rpcId: string): ApprovalRequest | null {
@@ -76,6 +102,30 @@ function parseApproval(frame: ApprovalMuxFrame, rpcId: string): ApprovalRequest 
     return null;
   }
   return { kind: 'approval-requested', reason, rpcId, sessionId, approvalId };
+}
+
+function parseQuestion(frame: QuestionMuxFrame, rpcId: string): QuestionRequest | null {
+  const { sessionId, questions } = frame;
+  if (typeof rpcId !== 'string' || typeof sessionId !== 'string' || !Array.isArray(questions)) {
+    return null;
+  }
+
+  // TODO: multiple questions at once will be handled later
+  const firstValidQuestion = questions.find((value): value is QuestionItem => {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+    const question = value as QuestionItem;
+    if (typeof question.question !== 'string' || question.question === '') {
+      return false;
+    }
+    return true;
+  });
+  if (!firstValidQuestion) {
+    return null;
+  }
+
+  return { kind: 'question-requested', rpcId, sessionId, questions: [firstValidQuestion] };
 }
 
 function parseAssistantChunk(event: AssistantChunkEvent, rpcId: string): SessionEvent | null {
@@ -128,9 +178,15 @@ function parseSessionEvent(event: SessionStreamEvent, rpcId: string): SessionEve
   return null;
 }
 
-export function parseEvent(frame: MuxFrame, rpcId: string): SessionEvent | ApprovalRequest | null {
+export function parseEvent(
+  frame: MuxFrame,
+  rpcId: string
+): SessionEvent | ApprovalRequest | QuestionRequest | null {
   if (frame.type === 'approval/requested') {
     return parseApproval(frame, rpcId);
+  }
+  if (frame.type === 'question/requested') {
+    return parseQuestion(frame, rpcId);
   }
   if (frame.type === 'session/event') {
     return parseSessionEvent(frame.event, rpcId);

@@ -40,7 +40,27 @@ export type ApprovalRequest = {
   reason: string;
 };
 
-export type SessionEvent = AssistantDelta | AssistantComplete | ToolCall | ApprovalRequest;
+export type QuestionOption = {
+  label: string;
+  description?: string;
+};
+
+export type QuestionItem = {
+  id: string;
+  question: string;
+  header?: string;
+  detail?: string;
+  options?: QuestionOption[];
+  multiSelect?: boolean;
+};
+
+export type QuestionRequest = {
+  kind: 'question-requested';
+  sessionId: string;
+  questions: QuestionItem[];
+};
+
+export type SessionEvent = AssistantDelta | AssistantComplete | ToolCall | ApprovalRequest | QuestionRequest;
 
 export interface Harness {
   readonly sessionId: string;

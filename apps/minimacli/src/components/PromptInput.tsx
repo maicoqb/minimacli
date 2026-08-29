@@ -10,14 +10,15 @@ const BORDER = 1;
 const PADDING = 1;
 
 export default function PromptInput() {
-  const { isReady, prompt, isTurnActive, hasPendingApproval } = useSession();
+  const { isReady, prompt, isTurnActive, hasPendingApproval, pendingQuestion } = useSession();
   const onInput = useInput();
   const exitPending = useCtrlCHandler();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const dots = useLoadingDots(isTurnActive);
 
-  const isDisabled = !isReady || hasPendingApproval;
+  const hasPendingQuestion = pendingQuestion !== null;
+  const isDisabled = !isReady || hasPendingApproval || hasPendingQuestion;
   const sendBlocked = isDisabled || isTurnActive;
 
   async function handleSend(text: string) {

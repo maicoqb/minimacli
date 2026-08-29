@@ -41,10 +41,11 @@ Journeys:
   - [x] 4.3 Choose the option: allow or deny.
   - [x] 4.4 Error: responding fails → can try again.
 - [ ] **5. AI questions** — the AI asks the user to answer questions.
-  - [ ] 5.1 Display a question with its options.
+  - [x] 5.1 Display a question with its options.
   - [ ] 5.2 Support single selection.
   - [ ] 5.3 Support free-text answers.
-  - [ ] 5.6 Error: responding fails → can try again.
+  - [ ] 5.4 Support multiple questions at once.
+  - [ ] 5.5 Error: responding fails → can try again.
 - [ ] **6. Single session** — the conversation belongs to a session.
   - [ ] 6.1 Opening the CLI starts a session.
   - [ ] 6.2 Opening the CLI in the same directory opens the last session.
@@ -78,6 +79,7 @@ Journeys:
 - [ ] **5. AI questions** — question details.
   - [ ] 5.1 Multiple selection.
   - [ ] 5.2 Skip question.
+  - [ ] 5.3 Scrollable question panel.
 
 ### Phase 3 — Watcher
 
@@ -91,7 +93,7 @@ packaging (e.g., installable global binary); i18n.
 
 ## Others
 
-Ideas and nice-to-haves tracked in `.docs/NOTES.md`, not committed to a phase
+Ideas and nice-to-haves, not committed to a phase
 yet:
 
 - **Message queue** — queue prompts while a turn is running.
@@ -117,5 +119,6 @@ yet:
 - **Strip markdown in message text** — approval `reason` can carry `**` formatting.
 - **Always show last user message** — pin the latest user message on screen.
 - **Tool output parsers** — friendly display for tool outputs.
+- **Minimize modals**.
 
 
