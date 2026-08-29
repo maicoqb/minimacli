@@ -19,17 +19,17 @@ const OPTIONS = [
 export default function ApprovalPanel({ top, right, bottom, left }: ApprovalPanelProps) {
   const { hasPendingApproval, respondApproval } = useSession();
   const [selected, setSelected] = useState(1);
-  const onInput = useInput();
+  const onInput = useInput({ contexts: ['approval'] });
 
   onInput((action) => {
     if (!hasPendingApproval) {
       return;
     }
-    if (action.type === 'up') {
+    if (action.type === 'approval.up') {
       setSelected((current) => Math.max(0, current - 1));
-    } else if (action.type === 'down') {
+    } else if (action.type === 'approval.down') {
       setSelected((current) => Math.min(OPTIONS.length - 1, current + 1));
-    } else if (action.type === 'submit') {
+    } else if (action.type === 'approval.submit') {
       respondApproval(OPTIONS[selected].value as 'allow' | 'deny');
     }
   });

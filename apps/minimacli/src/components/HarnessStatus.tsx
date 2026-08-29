@@ -8,10 +8,10 @@ import { useSession } from '../context/SessionContext';
 export default function HarnessStatus() {
   const { status, descriptor, url, retry } = useHarness();
   const { workspace } = useSession();
-  const onInput = useInput({ isActive: status === 'down' });
+  const onInput = useInput({ contexts: ['harness'], isActive: status === 'down' });
 
   onInput((action) => {
-    if (action.type === 'retry' && status === 'down') {
+    if (action.type === 'harness.retry' && status === 'down') {
       retry();
     }
   });

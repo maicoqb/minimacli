@@ -3,7 +3,7 @@ import { Box, Text } from 'ink';
 import TextArea from './TextArea';
 import { useInput } from '../hooks/useInput';
 import { useLoadingDots } from '../hooks/useLoadingDots';
-import { useCtrlCHandler } from '../hooks/useCtrlCHandler';
+import { useExit } from '../hooks/useExit';
 import { useSession } from '../context/SessionContext';
 
 const BORDER = 1;
@@ -18,8 +18,8 @@ export default function PromptInput() {
     hasPendingApproval,
     pendingQuestion,
   } = useSession();
-  const onInput = useInput();
-  const exitPending = useCtrlCHandler();
+  const onInput = useInput({ contexts: ['prompt'] });
+  const exitPending = useExit();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const dots = useLoadingDots(isTurnActive);
@@ -46,7 +46,7 @@ export default function PromptInput() {
   }
 
   onInput((action) => {
-    if (action.type === 'escape') {
+    if (action.type === 'prompt.clear') {
       setValue('');
       if (hasQuestion && isCustomAnswer) {
         respondQuestion({ answers: [] });
@@ -57,7 +57,7 @@ export default function PromptInput() {
     if (sendBlocked) {
       return;
     }
-    if (action.type === 'submit' && value.trim() !== '') {
+    if (action.type === 'prompt.submit' && value.trim() !== '') {
       handleSend(value);
     }
   });

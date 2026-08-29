@@ -18,17 +18,20 @@ export default function QuestionPanel({ top, right, bottom, left }: QuestionPane
   const customIndex = options.length;
   const optionCount = options.length + 1;
   const [selected, setSelected] = useState(0);
-  const onInput = useInput();
+  const onInput = useInput({ contexts: ['question'] });
 
   onInput((action) => {
+    if (!action) {
+      return;
+    }
     if (!question) {
       return;
     }
-    if (action.type === 'up') {
+    if (action.type === 'question.up') {
       setSelected((current) => Math.max(0, current - 1));
-    } else if (action.type === 'down') {
+    } else if (action.type === 'question.down') {
       setSelected((current) => Math.min(optionCount - 1, current + 1));
-    } else if (action.type === 'submit') {
+    } else if (action.type === 'question.submit') {
       if (selected === customIndex) {
         respondQuestion({ answers: [{ id: question.id, selected: [INPUT_CUSTOM_ANSWER] }] });
       } else if (options.length > 0) {

@@ -32,18 +32,18 @@ export default function Scrollable<T>({ lines, width, renderLine, focusIndex }: 
     setScrollTop(focusIndex ?? Math.max(0, totalLines - visibleHeight));
   }, [focusIndex, lines, totalLines, visibleHeight]);
 
-  const onInput = useInput();
+  const onInput = useInput({ contexts: ['scroll'] });
   onInput((action) => {
-    if (action.type === 'scrollPageUp') {
+    if (action.type === 'scroll.pageUp') {
       setScrollTop((current) => clamp(current - visibleHeight));
     }
-    if (action.type === 'scrollPageDown') {
+    if (action.type === 'scroll.pageDown') {
       setScrollTop((current) => clamp(current + visibleHeight, maxScroll));
     }
-    if (action.type === 'scrollUp') {
+    if (action.type === 'scroll.up') {
       setScrollTop((current) => clamp(current - 1, maxScroll));
     }
-    if (action.type === 'scrollDown') {
+    if (action.type === 'scroll.down') {
       setScrollTop((current) => clamp(current + 1, maxScroll));
     }
   });

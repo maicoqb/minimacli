@@ -1,31 +1,82 @@
 import type { Key } from 'ink';
 import { keyToken } from './keys';
 
-export type CommandAction =
-  | { type: 'retry' }
-  | { type: 'submit' }
-  | { type: 'cancel' }
-  | { type: 'escape' }
-  | { type: 'scrollPageUp' }
-  | { type: 'scrollPageDown' }
-  | { type: 'scrollUp' }
-  | { type: 'scrollDown' }
-  | { type: 'up' }
-  | { type: 'down' };
+export type InputContext =
+  | 'approval'
+  | 'question'
+  | 'harness'
+  | 'prompt'
+  | 'scroll'
+  | 'exit';
 
-export const keymap: Record<string, CommandAction | null> = {
-  'ctrl+r': { type: 'retry' },
-  enter: { type: 'submit' },
-  'ctrl+c': { type: 'cancel' },
-  esc: { type: 'escape' },
-  pageup: { type: 'scrollPageUp' },
-  pagedown: { type: 'scrollPageDown' },
-  'ctrl+up': { type: 'scrollUp' },
-  'ctrl+down': { type: 'scrollDown' },
-  up: { type: 'up' },
-  down: { type: 'down' },
+export type HarnessCommandAction = { type: 'harness.retry' };
+
+export type ApprovalCommandAction =
+  | { type: 'approval.up' }
+  | { type: 'approval.down' }
+  | { type: 'approval.submit' };
+
+export type QuestionCommandAction =
+  | { type: 'question.up' }
+  | { type: 'question.down' }
+  | { type: 'question.submit' };
+
+export type PromptCommandAction =
+  | { type: 'prompt.submit' }
+  | { type: 'prompt.clear' };
+
+export type ScrollCommandAction =
+  | { type: 'scroll.pageUp' }
+  | { type: 'scroll.pageDown' }
+  | { type: 'scroll.up' }
+  | { type: 'scroll.down' };
+
+export type ExitCommandAction = { type: 'exit.cancel' };
+
+export type CommandAction =
+  | HarnessCommandAction
+  | ApprovalCommandAction
+  | QuestionCommandAction
+  | PromptCommandAction
+  | ScrollCommandAction
+  | ExitCommandAction;
+
+const keymaps: Record<InputContext, Record<string, CommandAction | null>> = {
+  harness: {
+    'ctrl+r': { type: 'harness.retry' },
+  },
+  approval: {
+    up: { type: 'approval.up' },
+    down: { type: 'approval.down' },
+    enter: { type: 'approval.submit' },
+  },
+  question: {
+    up: { type: 'question.up' },
+    down: { type: 'question.down' },
+    enter: { type: 'question.submit' },
+  },
+  prompt: {
+    enter: { type: 'prompt.submit' },
+    esc: { type: 'prompt.clear' },
+  },
+  scroll: {
+    pageup: { type: 'scroll.pageUp' },
+    pagedown: { type: 'scroll.pageDown' },
+    'ctrl+up': { type: 'scroll.up' },
+    'ctrl+down': { type: 'scroll.down' },
+  },
+  exit: {
+    'ctrl+c': { type: 'exit.cancel' },
+  },
 };
 
-export function resolveKey(input: string, key: Key): CommandAction | null {
-  return keymap[keyToken(input, key)] ?? null;
+export function resolveKey(
+  contexts: InputContext[],
+  input: string,
+  key: Key
+): CommandAction[] {
+  const token = keyToken(input, key);
+  return contexts
+    .map((context) => keymaps[context][token])
+    .filter((action): action is CommandAction => action !== null && action !== undefined);
 }

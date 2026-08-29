@@ -4,10 +4,10 @@ import { keyToken } from '../lib/keys';
 import { useInput } from './useInput';
 import { useSession } from '../context/SessionContext';
 
-export function useCtrlCHandler() {
+export function useExit(): boolean {
   const { isTurnActive, interrupt } = useSession();
   const { exit } = useApp();
-  const onInput = useInput();
+  const onInput = useInput({ contexts: ['exit'] });
   const [exitPending, setExitPending] = useState(false);
   const [cancelled, setCancelled] = useState(false);
 
@@ -19,7 +19,7 @@ export function useCtrlCHandler() {
   });
 
   onInput((action) => {
-    if (action.type !== 'cancel') {
+    if (action.type !== 'exit.cancel') {
       return;
     }
     if (isTurnActive && !cancelled) {
