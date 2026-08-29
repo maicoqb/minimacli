@@ -29,6 +29,7 @@ export default function PromptInput() {
   const isCustomAnswer = pendingQuestion?.customAnswer === true;
   const isDisabled = !isReady || hasPendingApproval || (hasQuestion && !isCustomAnswer);
   const sendBlocked = isDisabled || isTurnActive;
+  const placeholder = hasQuestion && isCustomAnswer ? 'Type your custom answer' : 'Type a message...';
 
   async function handleSend(text: string) {
     setError(null);
@@ -45,9 +46,12 @@ export default function PromptInput() {
   }
 
   onInput((action) => {
-    if (action.type === 'escape' && hasQuestion && isCustomAnswer) {
+    if (action.type === 'escape') {
       setValue('');
-      respondQuestion({ answers: [] });
+      if (hasQuestion && isCustomAnswer) {
+        respondQuestion({ answers: [] });
+        return;
+      }
       return;
     }
     if (sendBlocked) {
@@ -72,11 +76,15 @@ export default function PromptInput() {
         value={value}
         onChange={setValue}
         disabled={isDisabled}
-        placeholder={hasQuestion && isCustomAnswer ? 'Type your custom answer' : undefined}
+        placeholder={placeholder}
       />
       {hasQuestion && isCustomAnswer ? (
         <Box paddingLeft={1}>
           <Text color="gray">press Esc to back to options</Text>
+        </Box>
+      ) : value !== '' ? (
+        <Box paddingLeft={1}>
+          <Text color="gray">press Esc to clear</Text>
         </Box>
       ) : exitPending ? (
         <Box paddingLeft={1}>
