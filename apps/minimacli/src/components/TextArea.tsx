@@ -7,9 +7,10 @@ type TextAreaProps = {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 };
 
-export default function TextArea({ value, onChange, disabled = false }: TextAreaProps) {
+export default function TextArea({ value, onChange, disabled = false, placeholder }: TextAreaProps) {
   const [cursor, setCursor] = useState(0);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [width, setWidth] = useState(0);
@@ -83,11 +84,15 @@ export default function TextArea({ value, onChange, disabled = false }: TextArea
   return (
     <Box ref={ref} width="100%" flexGrow={1}>
       <Box height={visibleHeight} overflow="hidden" flexDirection="column">
-        {visibleLines.map((line, index) => (
-          <React.Fragment key={scrollTop + index}>
-            <Text>{line || ' '}</Text>
-          </React.Fragment>
-        ))}
+        {value === '' && placeholder ? (
+          <Text dimColor>{placeholder}</Text>
+        ) : (
+          visibleLines.map((line, index) => (
+            <React.Fragment key={scrollTop + index}>
+              <Text>{line || ' '}</Text>
+            </React.Fragment>
+          ))
+        )}
       </Box>
     </Box>
   );

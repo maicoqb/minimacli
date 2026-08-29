@@ -5,6 +5,7 @@ export type CommandAction =
   | { type: 'retry' }
   | { type: 'submit' }
   | { type: 'cancel' }
+  | { type: 'escape' }
   | { type: 'scrollPageUp' }
   | { type: 'scrollPageDown' }
   | { type: 'scrollUp' }
@@ -16,6 +17,7 @@ export const keymap: Record<string, CommandAction | null> = {
   'ctrl+r': { type: 'retry' },
   enter: { type: 'submit' },
   'ctrl+c': { type: 'cancel' },
+  esc: { type: 'escape' },
   pageup: { type: 'scrollPageUp' },
   pagedown: { type: 'scrollPageDown' },
   'ctrl+up': { type: 'scrollUp' },

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text } from 'ink';
-import { useSession } from '../context/SessionContext';
+import { INPUT_CUSTOM_ANSWER, useSession } from '../context/SessionContext';
 import { useInput } from '../hooks/useInput';
 import FloatingPanel from './FloatingPanel';
 
@@ -15,6 +15,8 @@ export default function QuestionPanel({ top, right, bottom, left }: QuestionPane
   const { pendingQuestion, respondQuestion } = useSession();
   const question = pendingQuestion?.questions[0];
   const options = question?.options ?? [];
+  const customIndex = options.length;
+  const optionCount = options.length + 1;
   const [selected, setSelected] = useState(0);
   const onInput = useInput();
 
@@ -25,9 +27,13 @@ export default function QuestionPanel({ top, right, bottom, left }: QuestionPane
     if (action.type === 'up') {
       setSelected((current) => Math.max(0, current - 1));
     } else if (action.type === 'down') {
-      setSelected((current) => Math.min(options.length - 1, current + 1));
-    } else if (action.type === 'submit' && options.length > 0) {
-      respondQuestion({ answers: [{ id: question.id, selected: [options[selected].label] }] });
+      setSelected((current) => Math.min(optionCount - 1, current + 1));
+    } else if (action.type === 'submit') {
+      if (selected === customIndex) {
+        respondQuestion({ answers: [{ id: question.id, selected: [INPUT_CUSTOM_ANSWER] }] });
+      } else if (options.length > 0) {
+        respondQuestion({ answers: [{ id: question.id, selected: [options[selected].label] }] });
+      }
     }
   });
 
@@ -66,6 +72,9 @@ export default function QuestionPanel({ top, right, bottom, left }: QuestionPane
             </React.Fragment>
           );
         })}
+        <Text color={selected === customIndex ? 'black' : 'white'} backgroundColor={selected === customIndex ? 'white' : undefined}>
+          {`- Custom answer...`}
+        </Text>
       </Box>
     </FloatingPanel>
   );

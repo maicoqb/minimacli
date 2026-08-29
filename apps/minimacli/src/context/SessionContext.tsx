@@ -30,6 +30,8 @@ type SessionContextValue = {
   messages: ChatMessage[];
 };
 
+export const INPUT_CUSTOM_ANSWER = 'input_custom_answer';
+
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
@@ -134,6 +136,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     async (answer: QuestionAnswer) => {
       if (!pendingQuestion) {
         throw new Error('no pending question');
+      }
+      if (answer.answers.length === 0) {
+        setPendingQuestion((current) => {
+          if (!current || current.customAnswer === undefined) {
+            return current;
+          }
+          const next = { ...current };
+          delete next.customAnswer;
+          return next;
+        });
+        return;
+      }
+      const selected = answer.answers[0]?.selected;
+      if (selected?.length === 1 && selected[0] === INPUT_CUSTOM_ANSWER) {
+        setPendingQuestion((current) => (current ? { ...current, customAnswer: true } : current));
+        return;
       }
       setPendingQuestion(null);
       await harness.respondQuestion(pendingQuestion, answer);

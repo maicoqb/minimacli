@@ -10,21 +10,34 @@ const BORDER = 1;
 const PADDING = 1;
 
 export default function PromptInput() {
-  const { isReady, prompt, isTurnActive, hasPendingApproval, pendingQuestion } = useSession();
+  const {
+    isReady,
+    prompt,
+    respondQuestion,
+    isTurnActive,
+    hasPendingApproval,
+    pendingQuestion,
+  } = useSession();
   const onInput = useInput();
   const exitPending = useCtrlCHandler();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const dots = useLoadingDots(isTurnActive);
 
-  const hasPendingQuestion = pendingQuestion !== null;
-  const isDisabled = !isReady || hasPendingApproval || hasPendingQuestion;
+  const question = pendingQuestion?.questions[0];
+  const hasQuestion = question != null;
+  const isCustomAnswer = pendingQuestion?.customAnswer === true;
+  const isDisabled = !isReady || hasPendingApproval || (hasQuestion && !isCustomAnswer);
   const sendBlocked = isDisabled || isTurnActive;
 
   async function handleSend(text: string) {
     setError(null);
     try {
-      await prompt(text);
+      if (hasQuestion && isCustomAnswer) {
+        await respondQuestion({ answers: [{ id: question.id, selected: [], custom: text }] });
+      } else {
+        await prompt(text);
+      }
       setValue('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'send failed');
@@ -32,6 +45,11 @@ export default function PromptInput() {
   }
 
   onInput((action) => {
+    if (action.type === 'escape' && hasQuestion && isCustomAnswer) {
+      setValue('');
+      respondQuestion({ answers: [] });
+      return;
+    }
     if (sendBlocked) {
       return;
     }
@@ -50,8 +68,17 @@ export default function PromptInput() {
       paddingRight={PADDING}
       flexDirection="column"
     >
-      <TextArea value={value} onChange={setValue} disabled={isDisabled} />
-      {exitPending ? (
+      <TextArea
+        value={value}
+        onChange={setValue}
+        disabled={isDisabled}
+        placeholder={hasQuestion && isCustomAnswer ? 'Type your custom answer' : undefined}
+      />
+      {hasQuestion && isCustomAnswer ? (
+        <Box paddingLeft={1}>
+          <Text color="gray">press Esc to back to options</Text>
+        </Box>
+      ) : exitPending ? (
         <Box paddingLeft={1}>
           <Text color="yellow">press Ctrl+C again to exit</Text>
         </Box>

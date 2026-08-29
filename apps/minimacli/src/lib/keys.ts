@@ -3,7 +3,9 @@ import type { Key } from 'ink';
 export function keyToken(input: string, key: Key): string {
   const mods = key.ctrl ? 'ctrl+' : '';
   let base: string;
-  if (key.return) {
+  if (key.escape) {
+    base = 'esc';
+  } else if (key.return) {
     base = 'enter';
   } else if (key.leftArrow) {
     base = 'left';

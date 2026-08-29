@@ -43,7 +43,7 @@ Journeys:
 - [ ] **5. AI questions** — the AI asks the user to answer questions.
   - [x] 5.1 Display a question with its options.
   - [x] 5.2 Support single selection.
-  - [ ] 5.3 Support free-text answers.
+  - [x] 5.3 Support free-text answers.
   - [ ] 5.4 Support multiple questions at once.
   - [ ] 5.5 Error: responding fails → can try again.
 - [ ] **6. Single session** — the conversation belongs to a session.

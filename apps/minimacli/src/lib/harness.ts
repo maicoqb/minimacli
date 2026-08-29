@@ -58,11 +58,13 @@ export type QuestionRequest = {
   kind: 'question-requested';
   sessionId: string;
   questions: QuestionItem[];
+  customAnswer?: boolean;
 };
 
 export type QuestionAnswerItem = {
   id: string;
   selected: string[];
+  custom?: string;
 };
 
 export type QuestionAnswer = {
