@@ -17,6 +17,8 @@ export type ApprovalCommandAction =
   | { type: 'approval.submit' };
 
 export type QuestionCommandAction =
+  | { type: 'question.previous' }
+  | { type: 'question.next' }
   | { type: 'question.up' }
   | { type: 'question.down' }
   | { type: 'question.submit' };
@@ -51,6 +53,8 @@ const keymaps: Record<InputContext, Record<string, CommandAction | null>> = {
     enter: { type: 'approval.submit' },
   },
   question: {
+    'ctrl+left': { type: 'question.previous' },
+    'ctrl+right': { type: 'question.next' },
     up: { type: 'question.up' },
     down: { type: 'question.down' },
     enter: { type: 'question.submit' },

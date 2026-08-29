@@ -35,7 +35,7 @@ export default function PromptInput() {
     setError(null);
     try {
       if (hasQuestion && isCustomAnswer) {
-        await respondQuestion({ answers: [{ id: question.id, selected: [], custom: text }] });
+        await respondQuestion({ id: question.id, selected: [], custom: text });
       } else {
         await prompt(text);
       }
@@ -49,7 +49,7 @@ export default function PromptInput() {
     if (action.type === 'prompt.clear') {
       setValue('');
       if (hasQuestion && isCustomAnswer) {
-        respondQuestion({ answers: [] });
+        respondQuestion({ id: question.id, selected: [] });
         return;
       }
       return;

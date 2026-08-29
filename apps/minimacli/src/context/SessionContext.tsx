@@ -10,12 +10,22 @@ import React, {
 import {
   getHarness,
   type ApprovalRequest,
-  type QuestionAnswer,
+  type QuestionAnswerItem,
+  type QuestionItem,
   type QuestionRequest,
   type SessionEvent,
 } from '../lib/harness';
 import { updateMessages, type ChatMessage } from '../lib/messages';
 import { useHarness } from './HarnessContext';
+
+export type AnswerableQuestion = QuestionItem & {
+  answer?: QuestionAnswerItem;
+};
+
+type PendingQuestion = Omit<QuestionRequest, 'questions'> & {
+  questions: AnswerableQuestion[];
+  customAnswer?: boolean;
+};
 
 type SessionContextValue = {
   isReady: boolean;
@@ -25,12 +35,44 @@ type SessionContextValue = {
   isTurnActive: boolean;
   hasPendingApproval: boolean;
   respondApproval: (kind: 'allow' | 'deny') => Promise<void>;
-  pendingQuestion: QuestionRequest | null;
-  respondQuestion: (answer: QuestionAnswer) => Promise<void>;
+  pendingQuestion: PendingQuestion | null;
+  respondQuestion: (answer: QuestionAnswerItem) => Promise<void>;
   messages: ChatMessage[];
 };
 
 export const INPUT_CUSTOM_ANSWER = 'input_custom_answer';
+
+type QuestionResult =
+  | { type: 'update'; next: PendingQuestion }
+  | { type: 'submit'; next: PendingQuestion };
+
+function resolveQuestion(
+  pendingQuestion: PendingQuestion,
+  answer: QuestionAnswerItem
+): QuestionResult {
+  if (
+    (answer.selected === undefined || answer.selected.length === 0) &&
+    !answer.custom
+  ) {
+    const { customAnswer, ...next } = pendingQuestion;
+    return { type: 'update', next };
+  }
+
+  if (answer.selected.length === 1 && answer.selected[0] === INPUT_CUSTOM_ANSWER) {
+    return { type: 'update', next: { ...pendingQuestion, customAnswer: true } };
+  }
+
+  const questions = pendingQuestion.questions.map((question) =>
+    question.id === answer.id ? { ...question, answer } : question
+  );
+  const allAnswered = questions.every((question) => question.answer !== undefined);
+
+  if (allAnswered) {
+    return { type: 'submit', next: { ...pendingQuestion, questions } };
+  }
+  
+  return { type: 'update', next: { ...pendingQuestion, questions } };
+}
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
@@ -42,7 +84,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTurnActive, setIsTurnActive] = useState(false);
   const [pendingApproval, setPendingApproval] = useState<ApprovalRequest | null>(null);
-  const [pendingQuestion, setPendingQuestion] = useState<QuestionRequest | null>(null);
+  const [pendingQuestion, setPendingQuestion] = useState<PendingQuestion | null>(null);
 
   const isReady = status === 'up' && sessionId !== null;
   const hasPendingApproval = pendingApproval !== null;
@@ -55,7 +97,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           setPendingApproval(event);
         }
         if (event.kind === 'question-requested' && event.questions.length > 0) {
-          setPendingQuestion(event);
+          setPendingQuestion(event as PendingQuestion);
         }
         setMessages((current) => {
           const next = updateMessages(current, event);
@@ -133,28 +175,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const respondQuestion = useCallback(
-    async (answer: QuestionAnswer) => {
+    async (answer: QuestionAnswerItem) => {
       if (!pendingQuestion) {
         throw new Error('no pending question');
       }
-      if (answer.answers.length === 0) {
-        setPendingQuestion((current) => {
-          if (!current || current.customAnswer === undefined) {
-            return current;
-          }
-          const next = { ...current };
-          delete next.customAnswer;
-          return next;
-        });
+      
+      const result = resolveQuestion(pendingQuestion, answer);
+      if (result.type === 'update') {
+        setPendingQuestion(result.next);
         return;
       }
-      const selected = answer.answers[0]?.selected;
-      if (selected?.length === 1 && selected[0] === INPUT_CUSTOM_ANSWER) {
-        setPendingQuestion((current) => (current ? { ...current, customAnswer: true } : current));
-        return;
-      }
+
+      const answers = result.next.questions.flatMap((q) => (q.answer ? [q.answer] : []));
       setPendingQuestion(null);
-      await harness.respondQuestion(pendingQuestion, answer);
+      await harness.respondQuestion(result.next, { answers });
     },
     [harness, pendingQuestion]
   );

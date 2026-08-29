@@ -40,12 +40,12 @@ Journeys:
   - [x] 4.2 Show what will be done (command/action).
   - [x] 4.3 Choose the option: allow or deny.
   - [x] 4.4 Error: responding fails → can try again.
-- [ ] **5. AI questions** — the AI asks the user to answer questions.
+- [x] **5. AI questions** — the AI asks the user to answer questions.
   - [x] 5.1 Display a question with its options.
   - [x] 5.2 Support single selection.
   - [x] 5.3 Support free-text answers.
-  - [ ] 5.4 Support multiple questions at once.
-  - [ ] 5.5 Error: responding fails → can try again.
+  - [x] 5.4 Support multiple questions at once.
+  - [x] 5.5 Error: responding fails → can try again.
 - [ ] **6. Single session** — the conversation belongs to a session.
   - [ ] 6.1 Opening the CLI starts a session.
   - [ ] 6.2 Opening the CLI in the same directory opens the last session.

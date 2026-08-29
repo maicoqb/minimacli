@@ -110,8 +110,7 @@ function parseQuestion(frame: QuestionMuxFrame, rpcId: string): QuestionRequest 
     return null;
   }
 
-  // TODO: multiple questions at once will be handled later
-  const firstValidQuestion = questions.find((value): value is QuestionItem => {
+  const validQuestions = questions.filter((value): value is QuestionItem => {
     if (typeof value !== 'object' || value === null) {
       return false;
     }
@@ -121,11 +120,11 @@ function parseQuestion(frame: QuestionMuxFrame, rpcId: string): QuestionRequest 
     }
     return true;
   });
-  if (!firstValidQuestion) {
+  if (validQuestions.length === 0) {
     return null;
   }
 
-  return { kind: 'question-requested', rpcId, sessionId, questions: [firstValidQuestion] };
+  return { kind: 'question-requested', rpcId, sessionId, questions: validQuestions };
 }
 
 function parseAssistantChunk(event: AssistantChunkEvent, rpcId: string): SessionEvent | null {
