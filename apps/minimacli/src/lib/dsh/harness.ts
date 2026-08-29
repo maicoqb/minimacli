@@ -2,10 +2,11 @@ import type {
   Harness,
   HarnessDescriptor,
   PromptAccepted,
+  QuestionAnswer,
   SessionCreated,
   SessionEvent,
 } from '../harness';
-import { parseEvent, type MuxFrame, type ApprovalRequest } from './events';
+import { parseEvent, type MuxFrame, type ApprovalRequest, type QuestionRequest } from './events';
 
 type Options = {
   url: string;
@@ -89,6 +90,32 @@ async function respondApproval(
   }
 }
 
+async function respondQuestion(
+  url: string,
+  request: QuestionRequest,
+  answer: QuestionAnswer
+): Promise<void> {
+  const response = await fetch(`${url}/api/respond`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      type: 'client-response',
+      rpcId: request.rpcId,
+      result: {
+        ok: true,
+        value: {
+          sessionId: request.sessionId,
+          answer,
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`respond failed: HTTP ${response.status}`);
+  }
+}
+
 function toWsUrl(httpUrl: string, path: string): string {
   const url = new URL(path, httpUrl);
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -133,5 +160,7 @@ export function createHarnessDsh({ url }: Options): Harness {
       streamEvents(url, sid, onEvent, signal, onClose),
     respondApproval: (request, decision) =>
       respondApproval(url, request as ApprovalRequest, decision),
+    respondQuestion: (request, answer) =>
+      respondQuestion(url, request as QuestionRequest, answer),
   };
 }

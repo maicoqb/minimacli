@@ -42,7 +42,7 @@ Journeys:
   - [x] 4.4 Error: responding fails → can try again.
 - [ ] **5. AI questions** — the AI asks the user to answer questions.
   - [x] 5.1 Display a question with its options.
-  - [ ] 5.2 Support single selection.
+  - [x] 5.2 Support single selection.
   - [ ] 5.3 Support free-text answers.
   - [ ] 5.4 Support multiple questions at once.
   - [ ] 5.5 Error: responding fails → can try again.

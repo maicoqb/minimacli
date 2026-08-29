@@ -10,7 +10,8 @@ import React, {
 import {
   getHarness,
   type ApprovalRequest,
-  type QuestionItem,
+  type QuestionAnswer,
+  type QuestionRequest,
   type SessionEvent,
 } from '../lib/harness';
 import { updateMessages, type ChatMessage } from '../lib/messages';
@@ -24,7 +25,8 @@ type SessionContextValue = {
   isTurnActive: boolean;
   hasPendingApproval: boolean;
   respondApproval: (kind: 'allow' | 'deny') => Promise<void>;
-  pendingQuestion: QuestionItem | null;
+  pendingQuestion: QuestionRequest | null;
+  respondQuestion: (answer: QuestionAnswer) => Promise<void>;
   messages: ChatMessage[];
 };
 
@@ -38,7 +40,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTurnActive, setIsTurnActive] = useState(false);
   const [pendingApproval, setPendingApproval] = useState<ApprovalRequest | null>(null);
-  const [pendingQuestion, setPendingQuestion] = useState<QuestionItem | null>(null);
+  const [pendingQuestion, setPendingQuestion] = useState<QuestionRequest | null>(null);
 
   const isReady = status === 'up' && sessionId !== null;
   const hasPendingApproval = pendingApproval !== null;
@@ -51,7 +53,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           setPendingApproval(event);
         }
         if (event.kind === 'question-requested' && event.questions.length > 0) {
-          setPendingQuestion(event.questions[0]);
+          setPendingQuestion(event);
         }
         setMessages((current) => {
           const next = updateMessages(current, event);
@@ -128,6 +130,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [harness, pendingApproval]
   );
 
+  const respondQuestion = useCallback(
+    async (answer: QuestionAnswer) => {
+      if (!pendingQuestion) {
+        throw new Error('no pending question');
+      }
+      setPendingQuestion(null);
+      await harness.respondQuestion(pendingQuestion, answer);
+    },
+    [harness, pendingQuestion]
+  );
+
   const value: SessionContextValue = {
     isReady,
     workspace,
@@ -137,6 +150,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     hasPendingApproval,
     respondApproval,
     pendingQuestion,
+    respondQuestion,
     messages,
   };
 

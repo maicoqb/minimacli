@@ -60,6 +60,15 @@ export type QuestionRequest = {
   questions: QuestionItem[];
 };
 
+export type QuestionAnswerItem = {
+  id: string;
+  selected: string[];
+};
+
+export type QuestionAnswer = {
+  answers: QuestionAnswerItem[];
+};
+
 export type SessionEvent = AssistantDelta | AssistantComplete | ToolCall | ApprovalRequest | QuestionRequest;
 
 export interface Harness {
@@ -75,6 +84,7 @@ export interface Harness {
     onClose?: () => void
   ): void;
   respondApproval(request: ApprovalRequest, decision: 'allow' | 'deny'): Promise<void>;
+  respondQuestion(request: QuestionRequest, answer: QuestionAnswer): Promise<void>;
 }
 
 const harnessCache = new Map<string, Harness>();
