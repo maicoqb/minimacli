@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "strict": false,
     "paths": {
-      "@minimacli/plugin": ["./libs/minimacli-plugin/src/index.ts"]
+      "@minimacli/plugin": ["./libs/minimacli-plugin/src/index.ts"],
+      "minimacli-dsh-plugin": ["./plugins/minimacli-dsh-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

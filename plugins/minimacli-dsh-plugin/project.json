@@ -1,0 +1,19 @@
+{
+  "name": "minimacli-dsh-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "plugins/minimacli-dsh-plugin/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/plugins/minimacli-dsh-plugin",
+        "main": "plugins/minimacli-dsh-plugin/src/index.ts",
+        "tsConfig": "plugins/minimacli-dsh-plugin/tsconfig.lib.json",
+        "assets": ["plugins/minimacli-dsh-plugin/*.md"]
+      }
+    }
+  }
+}

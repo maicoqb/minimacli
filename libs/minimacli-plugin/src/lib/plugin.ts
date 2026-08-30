@@ -18,11 +18,11 @@ export interface Plugin {
   readonly kind: PluginKind;
 }
 
-/** A harness plugin: drives a chat harness over the network. */
+/** A harness plugin: drives a chat harness. */
 export interface HarnessPlugin extends Plugin {
   readonly kind: 'harness';
-  /** Create a harness instance bound to `url`. */
-  create(url: string, options?: HarnessPluginOptions): Harness;
+  /** Create a harness instance from the given options. */
+  create(options?: HarnessPluginOptions): Harness;
 }
 
 /** The shape of a plugin module: its default export is the plugin. */
