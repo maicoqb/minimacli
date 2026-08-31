@@ -17,7 +17,12 @@ class WriteDistPackageJsonPlugin {
       const distPkg = {
         name: src.name,
         version: src.version,
+        description: src.description,
         type: 'module',
+        license: src.license,
+        repository: src.repository,
+        engines: src.engines,
+        keywords: src.keywords,
         main: './main.js',
         bin: src.bin,
       };
