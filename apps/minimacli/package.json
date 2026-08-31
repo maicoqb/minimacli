@@ -1,8 +1,26 @@
 {
-    "name": "minimacli",
-    "version": "0.1.0",
-    "type": "module",
-    "bin": {
-        "minimacli": "main.js"
-    }
+  "name": "@minimacli/minimacli",
+  "version": "0.1.0",
+  "description": "Thin DSH terminal client (TUI) that complements the web GUI.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maicoqb/minimacli.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "dsh",
+    "cli",
+    "tui",
+    "terminal"
+  ],
+  "bin": {
+    "minimacli": "main.js"
+  }
 }
