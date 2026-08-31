@@ -1,7 +1,6 @@
 {
-  "name": "minimacli-dsh-plugin",
-  "version": "0.0.1",
-  "private": true,
+  "name": "@minimacli/dsh-plugin",
+  "version": "0.1.0",
   "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",

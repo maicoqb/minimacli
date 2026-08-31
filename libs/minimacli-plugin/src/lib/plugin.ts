@@ -29,3 +29,8 @@ export interface HarnessPlugin extends Plugin {
 export type PluginModule = {
   default: Plugin;
 };
+
+/** Narrow a generic `Plugin` to a `HarnessPlugin` when its kind is harness. */
+export function isHarnessPlugin(plugin: Plugin): plugin is HarnessPlugin {
+  return plugin.kind === 'harness';
+}

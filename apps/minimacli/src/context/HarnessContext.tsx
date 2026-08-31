@@ -15,14 +15,13 @@ type HarnessContextValue = {
   status: HarnessStatus;
   ready: boolean;
   descriptor: HarnessDescriptor | null;
-  url: string;
   retry: () => void;
 };
 
 const HarnessContext = createContext<HarnessContextValue | null>(null);
 
-export function HarnessProvider({ url, children }: { url: string; children: ReactNode }) {
-  const harness = useMemo(() => getHarness(url), [url]);
+export function HarnessProvider({ children }: { children: ReactNode }) {
+  const harness = useMemo(() => getHarness(), []);
   const [status, setStatus] = useState<HarnessStatus>('checking');
   const [descriptor, setDescriptor] = useState<HarnessDescriptor | null>(null);
 
@@ -46,10 +45,9 @@ export function HarnessProvider({ url, children }: { url: string; children: Reac
       status,
       ready: status === 'up',
       descriptor,
-      url,
       retry,
     }),
-    [status, descriptor, url, retry]
+    [status, descriptor, retry]
   );
 
   return <HarnessContext.Provider value={value}>{children}</HarnessContext.Provider>;

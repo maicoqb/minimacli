@@ -60,13 +60,16 @@ Journeys:
 
 - [x] **1. Export plugin interface** — expose the contract a plugin implements.
   - [x] 1.1 A single plugin contract: create.
-- [ ] **2. Create a plugin** — provide the DSH harness as a plugin.
-  - [ ] 2.1 Extract the DSH client logic into the adapter plugin.
-  - [ ] 2.2 Load the DSH adapter through the plugin mechanism, not hardcoded.
-- [ ] **3. Load a plugin** — the client discovers and loads plugins.
-  - [ ] 3.1 Locate the installed plugins the user added.
-  - [ ] 3.2 Load a plugin artifact against a fixed loading contract.
-  - [ ] 3.3 Detect which plugin matches a given harness and use it.
+- [x] **2. Create a plugin** — provide the DSH harness as a plugin.
+  - [x] 2.1 Extract the DSH client logic into the adapter plugin.
+  - [x] 2.2 Load the DSH adapter through the plugin mechanism, not hardcoded.
+- [x] **3. Load a plugin** — the client discovers and loads plugins.
+  - [x] 3.1 Locate the installed plugins the user added.
+  - [x] 3.2 Load a plugin artifact against a fixed loading contract.
+  - [x] 3.3 Detect which plugin matches a given harness and use it.
+- [ ] **4. Install a plugin** — install and register a plugin.
+  - [ ] 4.1 Install a plugin into its own plugins folder.
+  - [ ] 4.3 Register the plugin in the plugins.json ledger.
 
 ### Phase 3 — Full TUI
 
