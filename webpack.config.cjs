@@ -32,6 +32,12 @@ class WriteDistPackageJsonPlugin {
         path.join(outDir, 'package.json'),
         JSON.stringify(distPkg, null, 2) + '\n'
       );
+      for (const file of ['README.md', 'LICENSE']) {
+        const srcFn = path.join(ROOT, file === 'README.md' ? 'apps/minimacli/README.md' : 'LICENSE');
+        if (fs.existsSync(srcFn)) {
+          fs.copyFileSync(srcFn, path.join(outDir, file));
+        }
+      }
     });
   }
 }
