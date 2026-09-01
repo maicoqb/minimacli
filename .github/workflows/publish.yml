@@ -17,14 +17,17 @@ jobs:
       matrix:
         include:
           - name: '@minimacli/plugin'
+            application: minimacli-plugin
             package: libs/minimacli-plugin/package.json
             dist: dist/libs/minimacli-plugin
             script: npm run publish:minimacli-plugin
           - name: '@minimacli/dsh-plugin'
+            application: minimacli-dsh-plugin
             package: plugins/minimacli-dsh-plugin/package.json
             dist: dist/plugins/minimacli-dsh-plugin
             script: npm run publish:minimacli-dsh-plugin
           - name: '@minimacli/minimacli'
+            application: minimacli
             package: apps/minimacli/package.json
             dist: dist/minimacli
             script: npm run publish:minimacli
@@ -68,7 +71,7 @@ jobs:
             exit 1
           fi
 
-          npx nx build ${{ matrix.name }}
+          npx nx build ${{ matrix.application }}
 
           cd "${{ matrix.dist }}"
           npm publish --access public --dry-run
