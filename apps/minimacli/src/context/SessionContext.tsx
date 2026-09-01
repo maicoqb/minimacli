@@ -84,8 +84,8 @@ export function SessionProvider({
   children: ReactNode;
   forceNewSession?: boolean;
 }) {
-  const { url, status } = useHarness();
-  const harness = useMemo(() => getHarness(url), [url]);
+  const { status } = useHarness();
+  const harness = useMemo(() => getHarness(), []);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [workspace, setWorkspace] = useState(process.cwd());
   const [messages, setMessages] = useState<ChatMessage[]>([]);

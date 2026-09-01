@@ -6,7 +6,7 @@ import { useHarness } from '../context/HarnessContext';
 import { useSession } from '../context/SessionContext';
 
 export default function HarnessStatus() {
-  const { status, descriptor, url, retry } = useHarness();
+  const { status, descriptor, retry } = useHarness();
   const { workspace } = useSession();
   const onInput = useInput({ contexts: ['harness'], isActive: status === 'down' });
 
@@ -20,7 +20,7 @@ export default function HarnessStatus() {
     return <Text color="gray">connecting to harness…</Text>;
   }
   if (status === 'down') {
-    return <Text color="red">x harness unreachable at {url} - press Ctrl+R to retry</Text>;
+    return <Text color="red">x harness unreachable - press Ctrl+R to retry</Text>;
   }
   return (
     <Box width="100%" flexDirection="row" justifyContent="space-between">

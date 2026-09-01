@@ -58,6 +58,9 @@ module.exports = {
   externalsPresets: { node: true },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      '@minimacli/plugin': path.resolve(ROOT, 'libs/minimacli-plugin/src/index.ts')
+    },
   },
   module: {
     rules: [

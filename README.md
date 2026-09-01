@@ -28,6 +28,17 @@ HTTP/WebSocket API and never boot their own harness profile.
 - **VS Code extension** (`minimacli`) — a webview chat panel plus an integrated
   terminal running the same CLI wrapper.
 
+## Plugins
+
+The CLI supports optional plugins that are installed locally and registered in
+`~/.minimacli/plugins.json` (or `%USERPROFILE%\.minimacli\plugins.json` on
+Windows). The recommended default for DSH is the `@minimacli/dsh-plugin`.
+
+```sh
+npm i -g @minimacli/minimacli
+minimacli --install @minimacli/dsh-plugin
+```
+
 ## Running
 
 ### minimacli TUI
@@ -67,4 +78,6 @@ The feature roadmap is tracked in
 
 ## Status
 
-Work in progress. Nothing is implemented yet.
+Work in progress. The plugin installation flow and the DSH plugin integration
+are implemented; the remaining work is primarily TUI polish and broader
+stability improvements.

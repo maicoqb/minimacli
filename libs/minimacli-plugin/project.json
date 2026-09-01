@@ -1,0 +1,19 @@
+{
+  "name": "minimacli-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/minimacli-plugin/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/minimacli-plugin",
+        "main": "libs/minimacli-plugin/src/index.ts",
+        "tsConfig": "libs/minimacli-plugin/tsconfig.lib.json",
+        "assets": ["libs/minimacli-plugin/*.md"]
+      }
+    }
+  }
+}

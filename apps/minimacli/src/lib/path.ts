@@ -13,3 +13,14 @@ export function formatWorkspace(cwd: string): string {
   }
   return cwd;
 }
+
+export function expandHome(path: string): string {
+  const home = homedir();
+  if (path === '~') {
+    return home;
+  }
+  if (path.startsWith('~/')) {
+    return `${home}/${path.slice(2)}`;
+  }
+  return path;
+}
