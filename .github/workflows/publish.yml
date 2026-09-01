@@ -41,6 +41,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Verify npm auth
+        run: |
+          npm whoami
+          npm view @minimacli/minimacli --json
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
       - name: Check version change for ${{ matrix.name }}
         id: version_check
         shell: bash
