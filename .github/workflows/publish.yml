@@ -1,0 +1,62 @@
+name: Publish packages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: '@minimacli/plugin'
+            package: libs/minimacli-plugin/package.json
+            script: npm run publish:minimacli-plugin
+          - name: '@minimacli/dsh-plugin'
+            package: plugins/minimacli-dsh-plugin/package.json
+            script: npm run publish:minimacli-dsh-plugin
+          - name: '@minimacli/minimacli'
+            package: apps/minimacli/package.json
+            script: npm run publish:minimacli
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check version change for ${{ matrix.name }}
+        id: version_check
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          if git diff origin/main...HEAD -- "${{ matrix.package }}" | grep -Eq '^[+-].*"version"'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish ${{ matrix.name }}
+        if: steps.version_check.outputs.changed == 'true'
+        run: ${{ matrix.script }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
