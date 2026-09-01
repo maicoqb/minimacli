@@ -38,8 +38,10 @@ That is what makes each objective reachable:
 - all clients share the same session store → **Continuity**
 - sessions are created freely, even within the same workspace → **Concurrency**
 
-The plugin path was rejected: plugin TUIs boot their own harness profile and
-ship uncontrollable security defaults.
+The architecture keeps the client thin and moves harness integration into
+installable plugins. The default plugin for DSH is the `@minimacli/dsh-plugin`,
+which provides the harness adapter and default connection settings without
+hardcoding a single harness implementation into the CLI.
 
 ## 3. Model: client
 
@@ -62,13 +64,15 @@ flowchart LR
 
 - Two **clients** — a terminal CLI and a VS Code extension — both talk to the
   already-running host at `http://127.0.0.1:<port>`.
-- The **dedicated web** is a harness instance (`@deepseek-ai/dsh` + web profile)
-  running on its own port.
+- The **dedicated web** is the harness instance selected by the active plugin.
+  For the default DSH flow, that is the DSH harness exposed through the
+  `@minimacli/dsh-plugin` adapter.
 - The **watcher** is a lightweight process that decides when to kill the web and cancel orphaned turns.
-- **Tools live in the DSH, not in the client** — the client only renders, sends
+- **Tools live in the harness, not in the client** — the client only renders, sends
   prompts and answers approvals via `respond`; whoever executes `read`/`write`/`pwsh`
-  etc. is the host (`dsh web`). The sandbox (read-only / workspace-write) is enforced
-  by the host.
+  etc. is the host. The sandbox (read-only / workspace-write) is enforced by the host.
+- The **plugin registry** stores installed plugins and their default options in a
+  local file such as `~/.minimacli/plugins.json`.
 
 ## 4. Components
 
