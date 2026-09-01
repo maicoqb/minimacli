@@ -1,11 +1,28 @@
 {
   "name": "@minimacli/dsh-plugin",
   "version": "0.1.0",
+  "description": "The DSH harness plugin for minimacli.",
   "type": "commonjs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maicoqb/minimacli.git"
+  },
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
-  "dependencies": {
-    "@minimacli/plugin": "*",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "dsh",
+    "cli",
+    "tui",
+    "terminal"
+  ],  "dependencies": {
+    "@minimacli/plugin": "^0.1.0",
     "tslib": "^2.3.0"
   }
 }
