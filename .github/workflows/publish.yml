@@ -18,12 +18,15 @@ jobs:
         include:
           - name: '@minimacli/plugin'
             package: libs/minimacli-plugin/package.json
+            dist: dist/libs/minimacli-plugin
             script: npm run publish:minimacli-plugin
           - name: '@minimacli/dsh-plugin'
             package: plugins/minimacli-dsh-plugin/package.json
+            dist: dist/plugins/minimacli-dsh-plugin
             script: npm run publish:minimacli-dsh-plugin
           - name: '@minimacli/minimacli'
             package: apps/minimacli/package.json
+            dist: dist/minimacli
             script: npm run publish:minimacli
 
     steps:
@@ -41,13 +44,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Verify npm auth
-        run: |
-          npm whoami
-          npm view @minimacli/minimacli --json
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Check version change for ${{ matrix.name }}
         id: version_check
         shell: bash
@@ -63,32 +59,16 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Show package metadata before publish
+      - name: Publish ${{ matrix.name }}
         if: steps.version_check.outputs.changed == 'true'
         shell: bash
         run: |
-          echo "Checking package metadata for ${{ matrix.name }}"
-          echo "--- source package ---"
-          cat "${{ matrix.package }}"
-
-          case "${{ matrix.name }}" in
-            "@minimacli/plugin") DIST_PATH="dist/libs/minimacli-plugin/package.json" ;;
-            "@minimacli/dsh-plugin") DIST_PATH="dist/plugins/minimacli-dsh-plugin/package.json" ;;
-            "@minimacli/minimacli") DIST_PATH="dist/minimacli/package.json" ;;
-            *) DIST_PATH="dist/package.json" ;;
-          esac
-
-          echo "--- generated package ---"
-          if [ -f "$DIST_PATH" ]; then
-            cat "$DIST_PATH"
-          else
-            echo "$DIST_PATH not found"
+          if [ ! -d "${{ matrix.dist }}" ]; then
+            echo "Missing dist folder: ${{ matrix.dist }}"
+            exit 1
           fi
 
-      - name: Publish ${{ matrix.name }}
-        if: steps.version_check.outputs.changed == 'true'
-        run: |
-          cd "$(dirname "${{ matrix.package }}")"
+          cd "${{ matrix.dist }}"
           npm publish --access public --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
