@@ -45,8 +45,12 @@ jobs:
         id: version_check
         shell: bash
         run: |
-          git fetch origin main --depth=1
-          if git diff origin/main...HEAD -- "${{ matrix.package }}" | grep -Eq '^[+-].*"version"'; then
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE="HEAD~1"
+          fi
+
+          if git diff --unified=0 "$BEFORE" "${{ github.sha }}" -- "${{ matrix.package }}" | grep -Eq '^[+-].*"version"'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
