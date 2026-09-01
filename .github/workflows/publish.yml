@@ -47,7 +47,7 @@ jobs:
           npm view @minimacli/minimacli --json
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
+
       - name: Check version change for ${{ matrix.name }}
         id: version_check
         shell: bash
@@ -63,8 +63,32 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Show package metadata before publish
+        if: steps.version_check.outputs.changed == 'true'
+        shell: bash
+        run: |
+          echo "Checking package metadata for ${{ matrix.name }}"
+          echo "--- source package ---"
+          cat "${{ matrix.package }}"
+
+          case "${{ matrix.name }}" in
+            "@minimacli/plugin") DIST_PATH="dist/libs/minimacli-plugin/package.json" ;;
+            "@minimacli/dsh-plugin") DIST_PATH="dist/plugins/minimacli-dsh-plugin/package.json" ;;
+            "@minimacli/minimacli") DIST_PATH="dist/minimacli/package.json" ;;
+            *) DIST_PATH="dist/package.json" ;;
+          esac
+
+          echo "--- generated package ---"
+          if [ -f "$DIST_PATH" ]; then
+            cat "$DIST_PATH"
+          else
+            echo "$DIST_PATH not found"
+          fi
+
       - name: Publish ${{ matrix.name }}
         if: steps.version_check.outputs.changed == 'true'
-        run: ${{ matrix.script }}
+        run: |
+          cd "$(dirname "${{ matrix.package }}")"
+          npm publish --access public --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
