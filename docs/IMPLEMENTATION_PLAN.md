@@ -68,8 +68,9 @@ Journeys:
   - [x] 3.2 Load a plugin artifact against a fixed loading contract.
   - [x] 3.3 Detect which plugin matches a given harness and use it.
 - [ ] **4. Install a plugin** — install and register a plugin.
-  - [ ] 4.1 Install a plugin into its own plugins folder.
-  - [ ] 4.3 Register the plugin in the plugins.json ledger.
+  - [x] 4.1 Install a plugin into its own plugins folder.
+  - [x] 4.2 Register the plugin in the plugins.json ledger.
+  - [x] 4.3 Load plugin default options.
 
 ### Phase 3 — Full TUI
 

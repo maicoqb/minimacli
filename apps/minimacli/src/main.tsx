@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 import React from 'react';
 import { render } from 'ink';
-import Screen from './components/Screen';
-import { HarnessProvider } from './context/HarnessContext';
-import { SessionProvider } from './context/SessionContext';
+import App from './App';
 import { parseCliArgs } from './lib/cli';
+import { installPlugin } from './lib/installPlugin';
 import { loadPlugins } from './lib/pluginStore';
 
 const cli = parseCliArgs(process.argv.slice(2));
 
+if (cli.install) {
+  await installPlugin(cli.install);
+  process.exit(0);
+}
+
 await loadPlugins();
 
 render(
-  <HarnessProvider>
-    <SessionProvider forceNewSession={cli.newSession}>
-      <Screen />
-    </SessionProvider>
-  </HarnessProvider>,
+  <App forceNewSession={cli.newSession} />,
   { exitOnCtrlC: false }
 );

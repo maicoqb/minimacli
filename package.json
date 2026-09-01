@@ -2,6 +2,11 @@
   "name": "minimacli",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "publish:minimacli-plugin": "npx nx build minimacli-plugin && cd dist/libs/minimacli-plugin && npm publish --access public",
+    "publish:minimacli-dsh-plugin": "npx nx build minimacli-dsh-plugin && cd dist/plugins/minimacli-dsh-plugin && npm publish --access public",
+    "publish:minimacli": "npx nx build minimacli && cd dist/minimacli && npm publish --access public"
+  },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@nx/esbuild": "23.1.1",

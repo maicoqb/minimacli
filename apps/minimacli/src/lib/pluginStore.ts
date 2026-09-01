@@ -1,11 +1,12 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { expandHome } from './path';
 import type { Plugin, PluginKind } from '@minimacli/plugin';
 
-type PluginConfig = {
+export type PluginConfig = {
   id: string;
   kind: PluginKind;
   active: boolean;
@@ -13,7 +14,7 @@ type PluginConfig = {
   module: string;
 };
 
-type PluginsFile = {
+export type PluginsFile = {
   plugins: PluginConfig[];
 };
 
@@ -30,17 +31,44 @@ export type PluginEntry = {
 
 const pluginStore = new Map<string, PluginEntry>();
 
-function getPluginsFile(): string {
+export function getPluginsFile(): string {
   return join(homedir(), '.minimacli', 'plugins.json');
 }
 
-function readPluginsFile(): PluginsFile {
+export function readPluginsFile(): PluginsFile {
   try {
     const raw = readFileSync(getPluginsFile(), 'utf-8');
     return JSON.parse(raw) as PluginsFile;
   } catch {
     return { plugins: [] };
   }
+}
+
+export function savePluginsFile(file: PluginsFile): void {
+  const dir = join(homedir(), '.minimacli');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(getPluginsFile(), JSON.stringify(file, null, 2), 'utf-8');
+}
+
+export function upsertPluginConfig(config: PluginConfig): void {
+  const file = readPluginsFile();
+  const next = [
+    ...file.plugins.filter(
+      (entry) => entry.id !== config.id && entry.module !== config.module
+    ),
+    config,
+  ];
+
+  savePluginsFile({ plugins: next });
+}
+
+export async function loadPluginFromDir(modulePath: string): Promise<Plugin> {
+  const entry = resolveEntry(expandHome(modulePath));
+  const module = (await import(/* webpackIgnore: true */ pathToFileURL(entry).href)) as Record<
+    string,
+    unknown
+  >;
+  return extractPlugin(module);
 }
 
 export async function loadPlugins(): Promise<void> {
@@ -50,11 +78,7 @@ export async function loadPlugins(): Promise<void> {
     const entry = resolveEntry(expandHome(config.module));
     console.error('[loadPlugins] loading', config.id, 'entry:', entry);
     try {
-      const module = (await import(/* webpackIgnore: true */ pathToFileURL(entry).href)) as Record<
-        string,
-        unknown
-      >;
-      const plugin = extractPlugin(module);
+      const plugin = await loadPluginFromDir(config.module);
       console.error('[loadPlugins] plugin', config.id, 'id:', plugin?.id, 'kind:', plugin?.kind);
       pluginStore.set(config.id, {
         plugin,
@@ -101,6 +125,29 @@ function resolveEntry(modulePath: string): string {
   } catch {
     // no package.json at that path; fall through.
   }
+
+  const segments = modulePath.split(/[\\/]/).filter(Boolean);
+  const name = segments.at(-1);
+  const parent = segments.at(-2);
+
+  if (name) {
+    const scopedCandidate = parent?.startsWith('@')
+      ? join(modulePath, 'node_modules', parent, name)
+      : join(modulePath, 'node_modules', name);
+
+    try {
+      const pkg = JSON.parse(readFileSync(join(scopedCandidate, 'package.json'), 'utf-8')) as {
+        main?: string;
+      };
+      if (pkg.main) {
+        return join(scopedCandidate, pkg.main);
+      }
+      return scopedCandidate;
+    } catch {
+      // keep the original modulePath for plain directories without package metadata.
+    }
+  }
+
   return modulePath;
 }
 
