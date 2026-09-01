@@ -3,7 +3,7 @@ import type {
   ApprovalRequest as IApprovalRequest,
   QuestionRequest as IQuestionRequest,
   ToolArguments
-} from '../harness';
+} from '@minimacli/plugin';
 
 type BaseMuxFrame = {
   type: string;

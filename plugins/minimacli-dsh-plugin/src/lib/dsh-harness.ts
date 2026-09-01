@@ -5,8 +5,8 @@ import type {
   QuestionAnswer,
   SessionCreated,
   SessionEvent,
-} from '../harness';
-import { parseEvent, type MuxFrame, type ApprovalRequest, type QuestionRequest } from './events';
+} from '@minimacli/plugin';
+import { parseEvent, type MuxFrame, type ApprovalRequest, type QuestionRequest } from './dsh-events';
 
 type Options = {
   url: string;
@@ -137,10 +137,11 @@ function streamEvents(
     }
     const envelope = JSON.parse(data) as { rpcId?: string; payload?: unknown };
     const frame = envelope.payload as MuxFrame | undefined;
-    if (!frame || frame.sessionId !== sessionId) {
+    const rpcId = envelope.rpcId;
+    if (!frame || typeof rpcId !== 'string' || frame.sessionId !== sessionId) {
       return;
     }
-    const parsed = parseEvent(frame, envelope.rpcId);
+    const parsed = parseEvent(frame, rpcId);
     if (parsed) {
       onEvent(parsed);
     }

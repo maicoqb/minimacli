@@ -51,7 +51,28 @@ Journeys:
   - [x] 6.2 Opening the CLI in the same directory opens the last session.
   - [x] 6.3 Starting a new session with `--new-session`, ignoring the stored last session.
 
-### Phase 2 — Full TUI
+### Phase 2 — Plugin architecture
+
+Done criteria: a harness is distributed as a plugin; the DSH adapter is loaded
+that way (plug and play) instead of being hardcoded in the client.
+
+Journeys:
+
+- [x] **1. Export plugin interface** — expose the contract a plugin implements.
+  - [x] 1.1 A single plugin contract: create.
+- [x] **2. Create a plugin** — provide the DSH harness as a plugin.
+  - [x] 2.1 Extract the DSH client logic into the adapter plugin.
+  - [x] 2.2 Load the DSH adapter through the plugin mechanism, not hardcoded.
+- [x] **3. Load a plugin** — the client discovers and loads plugins.
+  - [x] 3.1 Locate the installed plugins the user added.
+  - [x] 3.2 Load a plugin artifact against a fixed loading contract.
+  - [x] 3.3 Detect which plugin matches a given harness and use it.
+- [x] **4. Install a plugin** — install and register a plugin.
+  - [x] 4.1 Install a plugin into its own plugins folder.
+  - [x] 4.2 Register the plugin in the plugins.json ledger.
+  - [x] 4.3 Load plugin default options.
+
+### Phase 3 — Full TUI
 
 Done criteria: all journeys working.
 
@@ -82,12 +103,12 @@ Journeys:
   - [ ] 5.2 Skip question.
   - [ ] 5.3 Scrollable question panel.
 
-### Phase 3 — Watcher
+### Phase 4 — Watcher
 
 Done criteria: client dead without notice has its turn canceled; last client
 closes → web dies (prune + kill); watcher exits if the web dies.
 
-### Phase 4 — Final polish
+### Phase 5 — Final polish
 
 Done criteria: tests covering what was built; docs updated;
 packaging (e.g., installable global binary); i18n.

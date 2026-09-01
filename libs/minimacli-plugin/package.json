@@ -1,0 +1,15 @@
+{
+  "name": "@minimacli/plugin",
+  "version": "0.2.0",
+  "description": "The plugin contract for minimacli plugins.",
+  "type": "commonjs",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}
