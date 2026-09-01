@@ -69,6 +69,8 @@ jobs:
           fi
 
           pwd
+          ls -la
+          find . -maxdepth 3 -type d | grep dist || true
           cd "${{ matrix.dist }}"
           npm publish --access public --dry-run
         env:
