@@ -16,6 +16,8 @@ export interface Plugin {
   readonly id: string;
   /** Which family of plugin this is. */
   readonly kind: PluginKind;
+  /** Default option values used when registering the plugin. */
+  readonly defaultOptions?: Record<string, string>;
 }
 
 /** A harness plugin: drives a chat harness. */
