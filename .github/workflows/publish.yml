@@ -65,12 +65,7 @@ jobs:
       - name: Publish ${{ matrix.name }}
         if: steps.version_check.outputs.changed == 'true'
         shell: bash
-        run: |
-          if [ ! -d "${{ matrix.dist }}" ]; then
-            echo "Missing dist folder: ${{ matrix.dist }}"
-            exit 1
-          fi
-
+        run: |        
           npx nx build ${{ matrix.application }}
 
           cd "${{ matrix.dist }}"
