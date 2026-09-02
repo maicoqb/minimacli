@@ -24,20 +24,9 @@ HTTP/WebSocket API and never boot their own harness profile.
 
 ## Surfaces
 
-- **Terminal CLI** (`minimacli`) — a TUI that connects to the dedicated web.
-- **VS Code extension** (`minimacli`) — a webview chat panel plus an integrated
+- **[Terminal CLI](https://www.npmjs.com/package/@minimacli/minimacli)** (`minimacli`) — a TUI that connects to the dedicated web.
+- **VS Code extension** (`minimacli`) — **under development** — a webview chat panel plus an integrated
   terminal running the same CLI wrapper.
-
-## Plugins
-
-The CLI supports optional plugins that are installed locally and registered in
-`~/.minimacli/plugins.json` (or `%USERPROFILE%\.minimacli\plugins.json` on
-Windows). The recommended default for DSH is the `@minimacli/dsh-plugin`.
-
-```sh
-npm i -g @minimacli/minimacli
-minimacli --install @minimacli/dsh-plugin
-```
 
 ## Running
 
@@ -64,6 +53,47 @@ CLI globally with:
 ```sh
 npm i -g @minimacli/minimacli
 minimacli
+```
+
+## Plugins
+
+The CLI supports optional plugins that are installed locally and registered in
+`~/.minimacli/plugins.json` (or `%USERPROFILE%\.minimacli\plugins.json` on
+Windows). The recommended default for [DSH](https://www.npmjs.com/package/@minimacli/dsh-plugin) is the `@minimacli/dsh-plugin`.
+
+```sh
+npm i -g @minimacli/minimacli
+minimacli --install @minimacli/dsh-plugin
+```
+
+### Plugin Development
+
+To develop a plugin, you must implement the [plugin interface](https://www.npmjs.com/package/@minimacli/plugin) provided by `@minimacli/plugin`.
+
+```ts
+import type {
+   Harness,
+   HarnessPlugin,
+   HarnessPluginOptions,
+} from '@minimacli/plugin';
+
+// Example plugin
+export const dshPlugin: HarnessPlugin = {
+   // id of the plugin
+  id: 'dsh',
+  // kind of the plugin (currently only `harness`)
+  kind: 'harness',
+   // default options to build up the plugin
+  defaultOptions: {
+    url: 'http://127.0.0.1:3080',
+  },
+  // The plugin create method is required
+  create(options?: HarnessPluginOptions): Harness {
+    // ...
+  },
+};
+
+export default dshPlugin;
 ```
 
 ## Architecture
